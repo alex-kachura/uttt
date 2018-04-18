@@ -69,12 +69,11 @@ export default class UltimateTicTacToe extends Component {
     game[_TURN_INDEX] = mark === O ? X : O
 
     // set constraint
-    if (game[large_game_index + 81]) { // if finished
+    if (game[small_game_index + 81]) { // if finished
       game[_CONSTRAINT_INDEX] = 0 // 0 denotes no constraint
     } else {
-      game[_CONSTRAINT_INDEX] = large_game_index + 1 // [1..9] means there is constraint
+      game[_CONSTRAINT_INDEX] = small_game_index + 1 // [1..9] means there is constraint
     }
-
 
     this.setState({ game })
   }
@@ -182,7 +181,7 @@ export default class UltimateTicTacToe extends Component {
 
   _is_full(offset) {
     /* game is considered as full when all positions are taken */
-    return range(offset, offset + 9).every(i => !!this.state.game[i])
+    return indexOf(range(offset, offset + 9).map(i => this.state.game[i] !== 0), 0) > -1
   }
 
   _set_constraint(large_game_index) {
@@ -237,7 +236,7 @@ export default class UltimateTicTacToe extends Component {
     if (!(0 <= action.col_index && action.col_index < 9)) {
       console.error(`col_index value = ${action.col_index} is out of the scope of the board`)
     }
-    if (this.state.game[_CONSTRAINT_INDEX] !== 0 && !large_game_index === this.state.game[_CONSTRAINT_INDEX] - 1) {
+    if (this.state.game[_CONSTRAINT_INDEX] !== 0 && large_game_index !== this.state.game[_CONSTRAINT_INDEX] - 1) {
       console.error(`next move is under following constraint=${this.state.game[_CONSTRAINT_INDEX] - 1}, but selected action points to ${large_game_index}`)
     }
     if (this.state.game[large_game_index + 81]) {
@@ -257,7 +256,7 @@ export default class UltimateTicTacToe extends Component {
     const possibleIndices = this._get_possible_indices()
 
     console.log('state:', game)
-    console.log('_CONSTRAINT_INDEX:', game[_CONSTRAINT_INDEX])
+    console.log('game[_CONSTRAINT_INDEX]:', game[_CONSTRAINT_INDEX])
     console.log('_TURN_INDEX:', game[_TURN_INDEX])
     console.log('possible indices:', possibleIndices)
     console.log('is_full:', this._is_full())
