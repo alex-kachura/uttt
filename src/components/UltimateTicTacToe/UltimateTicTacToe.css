@@ -13,22 +13,26 @@
     grid-template-rows: repeat(3, 1fr);
 }
 
-
 .cell {
+    border-color: var(--black);
     font-family: monospace;
     font-size: 9px;
     line-height: 12px;
 }
 
-
 .cell.center {
-    border-left: 1px solid var(--black);
-    border-right: 1px solid var(--black);
+    border-left: 1px solid;
+    border-right: 1px solid;
 }
 
 .cell.middle {
-    border-top: 1px solid var(--black);
-    border-bottom: 1px solid var(--black);
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+}
+
+.big_cell.cell {
+    border-width: var(--big-cell-border-width);
+    padding: var(--big-cell-padding);
 }
 
 .small_cell {
@@ -47,39 +51,25 @@
     font-size: 24px;
 }
 
+.small_cell.playerX {
+    background-color: var(--playerX-color);
+}
+
+.small_cell.playerO {
+    background-color: var(--playerO-color);
+}
+
 .small_cell.possible {
-    background-color: var(--possible-color);
-}
-
-.small_cell.possible.interactive {
     cursor: pointer;
-    animation-name: blink;
-    animation-duration: 3s;
+    animation-duration: 2.2s;
     animation-iteration-count: infinite;
-    animation-timing-function: linear;
+    animation-timing-function: ease-in;
 }
 
-.small_cell.player2 {
-    background-color: var(--player-1-color);
+.playerXTurn .small_cell.possible {
+    animation-name: blinkPlayerX;
 }
 
-.small_cell.player1 {
-    background-color: var(--player-2-color);
-}
-
-.big_cell.cell {
-    border-width: var(--big-cell-border-width);
-    padding: var(--big-cell-padding);
-}
-
-.big_cell.possible {
-    background-color: var(--possible-color-big);
-}
-
-.big_cell.player2 {
-    background-color: var(--player-1-color-big);
-}
-
-.big_cell.player1 {
-    background-color: var(--player-2-color-big);
+.playerOTurn .small_cell.possible {
+    animation-name: blinkPlayerO;
 }

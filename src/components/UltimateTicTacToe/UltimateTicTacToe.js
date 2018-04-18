@@ -10,10 +10,10 @@ import './UltimateTicTacToe.css'
 // state encoding:
 // [0..80] - small games
 // [81..89] - large game
-const _TURN_INDEX = 90
-const _CONSTRAINT_INDEX = 91
-const _RESULT_INDEX = 92
-const _STATE_SIZE = 93
+const TURN_INDEX = 90
+const CONSTRAINT_INDEX = 91
+const RESULT_INDEX = 92
+const STATE_SIZE = 93
 const mapCodeToIcon = new Map([
   [X, <i className="fal fa-times" />],
   [O, <i className="fal fa-circle" />]
@@ -26,9 +26,9 @@ export default class UltimateTicTacToe extends Component {
     if (args.state) {
       this.state = args.state
     } else {
-      const game = new Array(_STATE_SIZE).fill(EMPTY)
+      const game = new Array(STATE_SIZE).fill(EMPTY)
 
-      game[_TURN_INDEX] = X
+      game[TURN_INDEX] = X
 
       this.state = { game }
     }
@@ -39,107 +39,82 @@ export default class UltimateTicTacToe extends Component {
   }
 
   execute(action) {
-    this._assert_action_legality(action)
+    if (this.assertActionLegality(action)) {
+      let game = [...this.state.game]
+      const { gameIndex, smallGameOffset, smallGameIndex, largeGameIndex } = this.extractIndices(action)
+      const mark = game[TURN_INDEX]
 
-    const game = [...this.state.game]
-    const { game_index, small_game_offset, small_game_index, large_game_index } = this._extract_indices(action)
-    const mark = game[_TURN_INDEX]
+      game[gameIndex] = mark
+      game = this.updateResult(game, mark, smallGameOffset, largeGameIndex)
+      game[TURN_INDEX] = mark === O ? X : O
+      game = this.setConstraint(game, smallGameIndex)
 
-    game[game_index] = mark
-
-    //update result
-    // check small game first
-    let updated = false
-    if (this._has_winning_position(mark, small_game_offset)) {
-      game[large_game_index + 81] = mark
-      updated = true
-    } else if (this._is_full(small_game_offset)) {
-      game[large_game_index + 81] = DRAW
-      updated = true
+      this.setState({ game })
     }
-    // check large game if it was updated
-    if (updated) {
-      if (this._has_winning_position(mark, 81)) {
-        game[_RESULT_INDEX] = mark
-      } else if (this._is_full(81)) {
-        game[_RESULT_INDEX] = DRAW
-      }
-    }
-
-    game[_TURN_INDEX] = mark === O ? X : O
-
-    // set constraint
-    if (game[small_game_index + 81]) { // if finished
-      game[_CONSTRAINT_INDEX] = 0 // 0 denotes no constraint
-    } else {
-      game[_CONSTRAINT_INDEX] = small_game_index + 1 // [1..9] means there is constraint
-    }
-
-    this.setState({ game })
   }
 
-  is_terminated() {
-    return this.state.game[_RESULT_INDEX]
+  isTerminated() {
+    return this.state.game[RESULT_INDEX]
   }
 
-  is_result_X_won() {
-    return this.state.game[_RESULT_INDEX] === X
+  isResultXWon() {
+    return this.state.game[RESULT_INDEX] === X
   }
 
-  is_result_O_won() {
-    return this.state.game[_RESULT_INDEX] === O
+  isResultOWon() {
+    return this.state.game[RESULT_INDEX] === O
   }
 
-  is_result_draw() {
-    return this.state.game[_RESULT_INDEX] === DRAW
+  isResultDraw() {
+    return this.state.game[RESULT_INDEX] === DRAW
   }
 
-  is_turn_X() {
-    return this.state.game[_TURN_INDEX] === X
+  isTurnX() {
+    return this.state.game[TURN_INDEX] === X
   }
 
-  is_turn_O() {
-    return this.state.game[_TURN_INDEX] === O
+  isTurnO() {
+    return this.state.game[TURN_INDEX] === O
   }
 
-  get_possible_actions() {
-    return this._get_possible_indices().map((index) => {
-      const { row_index, col_index } = this._convert_to_rc(index)
+  getPossibleActions() {
+    return this.getPossibleIndices().map((index) => {
+      const { rowIndex, colIndex } = this.convertToRC(index)
 
-      return new Action(row_index, col_index, this.state.game[_TURN_INDEX])
+      return new Action(rowIndex, colIndex, this.state.game[TURN_INDEX])
     })
   }
 
-  get_state() {
+  getState() {
     return clone(this.state.game)
   }
 
-  _convert_to_rc(game_index) {
-    const row_index = 3 * (Math.floor(game_index / 27)) + Math.floor((game_index % 9) / 3)
-    const col_index = 3 * (Math.floor((game_index % 27) / 9)) + game_index % 3
+  convertToRC(gameIndex) {
+    const rowIndex = 3 * (Math.floor(gameIndex / 27)) + Math.floor((gameIndex % 9) / 3)
+    const colIndex = 3 * (Math.floor((gameIndex % 27) / 9)) + gameIndex % 3
 
-    return { row_index, col_index }
+    return { rowIndex, colIndex }
   }
 
-  _extract_indices(action) {
-    const small_game_offset = 27 * (Math.floor(action.row_index / 3)) + 9 * (Math.floor(action.col_index / 3))
-    const small_game_index = 3 * (action.row_index % 3) + action.col_index % 3
-    const game_index = small_game_offset + small_game_index
-    const large_game_index = Math.floor(small_game_offset / 9)
+  extractIndices(action) {
+    const smallGameOffset = 27 * (Math.floor(action.rowIndex / 3)) + 9 * (Math.floor(action.colIndex / 3))
+    const smallGameIndex = 3 * (action.rowIndex % 3) + action.colIndex % 3
+    const gameIndex = smallGameOffset + smallGameIndex
+    const largeGameIndex = Math.floor(smallGameOffset / 9)
 
-    return { game_index, small_game_offset, small_game_index, large_game_index }
+    return { gameIndex, smallGameOffset, smallGameIndex, largeGameIndex }
   }
 
-  _get_possible_indices() {
+  getPossibleIndices() {
     let indices = []
 
-    if (this.state.game[_CONSTRAINT_INDEX]) {
-      const offset = 9 * (this.state.game[_CONSTRAINT_INDEX] - 1)
-      indices = this._get_empty_indices(offset)
+    if (this.state.game[CONSTRAINT_INDEX]) {
+      const offset = 9 * (this.state.game[CONSTRAINT_INDEX] - 1)
+      indices = this.getEmptyIndices(offset)
     } else {
       range(81, 90).map((s, i) => {
         if (!this.state.game[s]) {
-          indices = indices.concat(this._get_empty_indices(9 * i))
+          indices = indices.concat(this.getEmptyIndices(9 * i))
         }
       })
     }
@@ -147,13 +122,14 @@ export default class UltimateTicTacToe extends Component {
     return indices
   }
 
-  _get_empty_indices(offset) {
+  getEmptyIndices(offset) {
     return range(offset, offset + 9).filter(i => !this.state.game[i])
   }
 
-  _has_winning_position(mark, offset) {
+  hasWinningPosition(mark, offset) {
     /* this method checks whether given state has winning position */
     const s = this.state.game
+
     return (
         mark === s[offset + 4] &&
         (
@@ -179,95 +155,110 @@ export default class UltimateTicTacToe extends Component {
       )
   }
 
-  _is_full(offset) {
+  isFull(offset) {
     /* game is considered as full when all positions are taken */
     return indexOf(range(offset, offset + 9).map(i => this.state.game[i] !== 0), 0) > -1
   }
 
-  _set_constraint(large_game_index) {
-    const game = [...this.state.game]
+  setConstraint(gameState, gameIndex) {
+    const game = [...gameState]
 
-    if (game[large_game_index + 81]) { // if finished
-      game[_CONSTRAINT_INDEX] = 0 // 0 denotes no constraint
+    if (game[gameIndex + 81]) { // if finished
+      game[CONSTRAINT_INDEX] = 0 // 0 denotes no constraint
     } else {
-      game[_CONSTRAINT_INDEX] = large_game_index + 1 // [1..9] means there is constraint
+      game[CONSTRAINT_INDEX] = gameIndex + 1 // [1..9] means there is constraint
     }
 
-    this.setState({ game })
+    return game
   }
 
-  _update_result(mark, small_game_offset, large_game_index) {
+  updateResult(gameState, mark, smallGameOffset, largeGameIndex) {
     /* result is assigned to a game when either of players won or all positions are taken */
-    const game = [...this.state.game]
+    const game = [...gameState]
 
     // check small game first
     let updated = false
-    if (this._has_winning_position(mark, small_game_offset)) {
-      game[large_game_index + 81] = mark
+    if (this.hasWinningPosition(mark, smallGameOffset)) {
+      game[largeGameIndex + 81] = mark
       updated = true
-    } else if (this._is_full(small_game_offset)) {
-      game[large_game_index + 81] = DRAW
+    } else if (this.isFull(smallGameOffset)) {
+      game[largeGameIndex + 81] = DRAW
       updated = true
     }
     // check large game if it was updated
     if (updated) {
-      if (this._has_winning_position(mark, 81)) {
-        game[_RESULT_INDEX] = mark
-      } else if (this._is_full(81)) {
-        game[_RESULT_INDEX] = DRAW
+      if (this.hasWinningPosition(mark, 81)) {
+        game[RESULT_INDEX] = mark
+      } else if (this.isFull(81)) {
+        game[RESULT_INDEX] = DRAW
       }
     }
 
-    this.setState({ game })
+    return game
   }
 
-  _assert_action_legality(action) {
-    const { game_index, /*small_game_offset, small_game_index, */large_game_index } = this._extract_indices(action)
+  assertActionLegality(action) {
+    const { gameIndex, /*smallGameOffset, smallGameIndex, */largeGameIndex } = this.extractIndices(action)
+    const errors = []
 
-    if (this.is_terminated()) {
-      console.error(`environment is terminated`)
+    if (this.isTerminated()) {
+      errors.push(`environment is terminated`)
     }
-    if (this.state.game[_TURN_INDEX] !== action.turn) {
-      console.error(`environment expects action with turn=${this.state.game[_TURN_INDEX]}, but selected action has turn=${action.turn}`)
+    if (this.state.game[TURN_INDEX] !== action.turn) {
+      errors.push(`environment expects action with turn=${this.state.game[TURN_INDEX]}, but selected action has turn=${action.turn}`)
     }
-    if (!(0 <= action.row_index && action.row_index < 9)) {
-      console.error(`row_index value = ${action.row_index} is out of the scope of the board`)
+    if (!(0 <= action.rowIndex && action.rowIndex < 9)) {
+      errors.push(`rowIndex value = ${action.rowIndex} is out of the scope of the board`)
     }
-    if (!(0 <= action.col_index && action.col_index < 9)) {
-      console.error(`col_index value = ${action.col_index} is out of the scope of the board`)
+    if (!(0 <= action.colIndex && action.colIndex < 9)) {
+      errors.push(`colIndex value = ${action.colIndex} is out of the scope of the board`)
     }
-    if (this.state.game[_CONSTRAINT_INDEX] !== 0 && large_game_index !== this.state.game[_CONSTRAINT_INDEX] - 1) {
-      console.error(`next move is under following constraint=${this.state.game[_CONSTRAINT_INDEX] - 1}, but selected action points to ${large_game_index}`)
+    if (this.state.game[CONSTRAINT_INDEX] !== 0 && largeGameIndex !== this.state.game[CONSTRAINT_INDEX] - 1) {
+      errors.push(`next move is under constraint=${this.state.game[CONSTRAINT_INDEX] -
+      1}, but selected action points to ${largeGameIndex}`)
     }
-    if (this.state.game[large_game_index + 81]) {
-      console.error(`selected subgame=${large_game_index} is finished`)
+    if (this.state.game[largeGameIndex + 81]) {
+      errors.push(`selected sub-game=${largeGameIndex} is finished`)
     }
-    if (this.state.game[game_index]) {
-      console.error(`(row_index=${action.row_index}, col_index=${action.col_index}) is already taken`)
+    if (this.state.game[gameIndex]) {
+      errors.push(`cell (rowIndex=${action.rowIndex}, colIndex=${action.colIndex}) is already taken`)
+    }
+
+    if (errors.length) {
+      errors.map(error => console.log('%c' + error, 'color:#A5003F'))
+      return false
+    } else {
+      return true
     }
   }
 
-  handleCellClick(row_index, col_index) {
-    this.execute(new Action(row_index, col_index, this.state.game[_TURN_INDEX]))
+  handleCellClick(rowIndex, colIndex) {
+    this.execute(new Action(rowIndex, colIndex, this.state.game[TURN_INDEX]))
   }
 
   render() {
     const { game } = this.state
-    const possibleIndices = this._get_possible_indices()
+    const turn = game[TURN_INDEX]
+    const constraint = game[CONSTRAINT_INDEX]
+    const possibleIndices = this.getPossibleIndices()
 
-    console.log('state:', game)
-    console.log('game[_CONSTRAINT_INDEX]:', game[_CONSTRAINT_INDEX])
-    console.log('_TURN_INDEX:', game[_TURN_INDEX])
+    console.log('game:', game)
+    console.log('turn:', turn)
+    console.log('constraint:', constraint)
     console.log('possible indices:', possibleIndices)
-    console.log('is_full:', this._is_full())
-    console.log('is_terminated:', this.is_terminated())
-    console.log('has_winning_position:', this._has_winning_position(X, 0))
+    console.log('isFull:', this.isFull())
+    console.log('isTerminated:', this.isTerminated())
 
     return (
-      <div className="big_field field">
+      <div
+        className={classnames("big_field field", {
+          playerXTurn: turn === X,
+          playerOTurn: turn === O
+      })}
+      >
         {
           game.slice(81, 90).map((v, i) => {
-            const { row_index: ri, col_index: ci } = this._convert_to_rc(i)
+            const { rowIndex: ri, colIndex: ci } = this.convertToRC(i)
 
             return (
               <div
@@ -279,16 +270,15 @@ export default class UltimateTicTacToe extends Component {
                   left: !(i % 3),
                   center: !((i - 1) % 3),
                   right: !((i - 2) % 3),
-                  possible: false,
-                  player1: v === X,
-                  player2: v === O
+                  playerX: this.hasWinningPosition(X, i * 9),
+                  playerO: this.hasWinningPosition(O, i * 9)
                 })}
               >
                 <div className="small_field field">
                   {
                     game.slice(i * 9, i * 9 + 9).map((code, j) => {
                       const index = i * 9 + j
-                      const { row_index, col_index } = this._convert_to_rc(index)
+                      const { rowIndex, colIndex } = this.convertToRC(index)
 
                       return (
                         <div
@@ -301,12 +291,12 @@ export default class UltimateTicTacToe extends Component {
                             center: !((j - 1) % 3),
                             right: !((j - 2) % 3),
                             possible: indexOf(possibleIndices, index) > -1,
-                            player1: code === X,
-                            player2: code === O
+                            playerX: code === X,
+                            playerO: code === O
                           })}
-                          onClick={event => this.handleCellClick(row_index, col_index, event)}
+                          onClick={event => this.handleCellClick(rowIndex, colIndex, event)}
                         >
-                          {/*{i} {ri} {ci}<br />{v} {code} {index}<br />{j} {row_index} {col_index}*/}
+                          {/*{i} {ri} {ci}<br />{v} {code} {index}<br />{j} {rowIndex} {colIndex}*/}
                           {mapCodeToIcon.get(code) || null}
                         </div>
                       )
