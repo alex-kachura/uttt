@@ -26,27 +26,3 @@
         transform: rotate(360deg);
     }
 }
-
-@keyframes blinkPlayerX {
-    0% {
-        background-color: var(--playerX-color-light);
-    }
-    50% {
-        background-color: transparent;
-    }
-    100% {
-        background-color: var(--playerX-color-light);
-    }
-}
-
-@keyframes blinkPlayerO {
-    0% {
-        background-color: var(--playerO-color-light);
-    }
-    50% {
-        background-color: transparent;
-    }
-    100% {
-        background-color: var(--playerO-color-light);
-    }
-}

@@ -224,12 +224,9 @@ export default class UltimateTicTacToe extends Component {
       errors.push(`cell (rowIndex=${action.rowIndex}, colIndex=${action.colIndex}) is already taken`)
     }
 
-    if (errors.length) {
-      errors.map(error => console.log('%c' + error, 'color:#A5003F'))
-      return false
-    } else {
-      return true
-    }
+    errors.map(error => console.log('%c' + error, 'color:#A5003F'))
+
+    return !errors.length
   }
 
   handleCellClick(rowIndex, colIndex) {
