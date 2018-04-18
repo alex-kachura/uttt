@@ -1,0 +1,85 @@
+.big_field {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    margin: 30px auto;
+    width: var(--field-size);
+    height: var(--field-size);
+}
+
+.small_field {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+}
+
+
+.cell {
+    font-family: monospace;
+    font-size: 9px;
+    line-height: 12px;
+}
+
+
+.cell.center {
+    border-left: 1px solid var(--black);
+    border-right: 1px solid var(--black);
+}
+
+.cell.middle {
+    border-top: 1px solid var(--black);
+    border-bottom: 1px solid var(--black);
+}
+
+.small_cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: var(--cell-size);
+    height: var(--cell-size);
+}
+
+.small_cell .fa-times {
+    font-size: 30px;
+}
+
+.small_cell .fa-circle {
+    font-size: 24px;
+}
+
+.small_cell.possible {
+    background-color: var(--possible-color);
+}
+
+.small_cell.possible.interactive {
+    cursor: pointer;
+    animation-name: blink;
+    animation-duration: 3s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+.small_cell.player2 {
+    background-color: var(--player-1-color);
+}
+
+.small_cell.player1 {
+    background-color: var(--player-2-color);
+}
+
+.big_cell.cell {
+    border-width: var(--big-cell-border-width);
+    padding: var(--big-cell-padding);
+}
+
+.big_cell.possible {
+    background-color: var(--possible-color-big);
+}
+
+.big_cell.player2 {
+    background-color: var(--player-1-color-big);
+}
+
+.big_cell.player1 {
+    background-color: var(--player-2-color-big);
+}

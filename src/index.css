@@ -1,0 +1,58 @@
+:root {
+    --field-size: 500px;
+    --big-cell-padding: 24px;
+    --big-cell-border-width: 3px;
+    --cell-size: calc((var(--field-size) - var(--big-cell-padding) * 6 - var(--big-cell-border-width) * 2) / 9);
+    --black: #000000;
+    --possible-color: #33ff00;
+    --player-1-color: #0099ff;
+    --player-2-color: #ff3366;
+    --possible-color-big: #99ff99;
+    --player-1-color-big: #99ccff;
+    --player-2-color-big: #ff99cc;
+}
+
+html, body, div, span, h1, h2, h3, h4, h5, h6, p, pre, a, big, code, em, img, small, strong, b, u, i, ul, li,
+form, table, tbody, tfoot, thead, tr, th, td, canvas, footer, header, audio, video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+
+footer, header {
+    display: block;
+}
+
+body {
+    line-height: 1;
+}
+
+ol, ul {
+    list-style: none;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 100%;
+    text-size-adjust: 100%;
+    font-variant-ligatures: none;
+    font-variant-ligatures: none;
+    text-rendering: optimizeLegibility;
+    font-smoothing: antialiased;
+    text-shadow: rgba(0, 0, 0, 0.01) 0 0 1px;
+}
+
+body {
+    font-family: sans-serif;
+}
