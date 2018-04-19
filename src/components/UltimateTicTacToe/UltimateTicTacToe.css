@@ -35,6 +35,18 @@
     padding: var(--big-cell-padding);
 }
 
+.big_cell.playerX {
+    background-color: var(--playerX-color-light);
+}
+
+.big_cell.playerO {
+    background-color: var(--playerO-color-light);
+}
+
+.big_cell.draw {
+    background-color: var(--draw-color);
+}
+
 .small_cell {
     display: flex;
     justify-content: center;
@@ -59,6 +71,14 @@
     background-color: var(--playerO-color);
 }
 
+.small_cell.playerX.makesLineX {
+    background-color: var(--playerX-color-dark);
+}
+
+.small_cell.playerO.makesLineO {
+    background-color: var(--playerO-color-dark);
+}
+
 .small_cell.possible {
     cursor: pointer;
     animation-duration: 2.2s;
@@ -74,12 +94,20 @@
     animation-name: blinkPlayerO;
 }
 
+.finished.playerXTurn .small_cell.possible {
+    animation-name: none;
+}
+
+.finished.playerOTurn .small_cell.possible {
+    animation-name: none;
+}
+
 @keyframes blinkPlayerX {
     0% {
         background-color: var(--playerX-color-light);
     }
     50% {
-        background-color: transparent;
+        background-color: white;
     }
     100% {
         background-color: var(--playerX-color-light);
@@ -91,7 +119,7 @@
         background-color: var(--playerO-color-light);
     }
     50% {
-        background-color: transparent;
+        background-color: white;
     }
     100% {
         background-color: var(--playerO-color-light);

@@ -4,12 +4,13 @@
     --big-cell-border-width: 3px;
     --cell-size: calc((var(--field-size) - var(--big-cell-padding) * 6 - var(--big-cell-border-width) * 2) / 9);
     --black: #000000;
-    --playerX-color-dark: #993366;
-    --playerX-color: #ff3366;
+    --playerX-color-dark: #990033;
+    --playerX-color: #ff0066;
     --playerX-color-light: #ff99cc;
-    --playerO-color-dark: #0066cc;
+    --playerO-color-dark: #3333cc;
     --playerO-color: #0099ff;
     --playerO-color-light: #99ccff;
+    --draw-color: #ffff99;
 }
 
 html, body, div, span, h1, h2, h3, h4, h5, h6, p, pre, a, big, code, em, img, small, strong, b, u, i, ul, li,
