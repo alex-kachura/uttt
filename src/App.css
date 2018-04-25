@@ -1,14 +1,13 @@
 .App-logo {
-    width: 257px;
-    height: 60px;
+    width: 210px;
+    height: 49px;
 }
 
 .App-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: white;
-    padding: 20px;
+    padding: var(--big-cell-padding);
     color: black;
 }
 
@@ -21,4 +20,9 @@
 .dummy {
     flex-shrink: 1;
     width: 257px;
+}
+
+.App-content p {
+    padding: 0 var(--big-cell-padding);
+    line-height: 1.5em;
 }

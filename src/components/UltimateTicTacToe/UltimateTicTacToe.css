@@ -1,14 +1,32 @@
 .uttt {
     display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.uttt-start {
+    font-size: 1em;
+    border: none;
+    margin-top: var(--big-cell-padding);
+    padding: 10px 15px;
+    line-height: 1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: white;
+    background-color: #00B1EB;
+}
+
+.uttt-game {
+    display: flex;
     justify-content: center;
+    flex-wrap: wrap;
 }
 
 .game-panel {
     flex-shrink: 0;
-    margin: var(--section-margin);
-    margin-left: calc(var(--field-size) / 3);
+    margin: var(--big-cell-padding) 0 var(--big-cell-padding) calc(var(--field-size) / 3);
     padding: var(--big-cell-padding);
-    width: calc(var(--field-size) / 3 * 2);
+    width: calc(var(--field-size) / 3 * 2 + var(--big-cell-border-width) * 2);
     line-height: 1.5em;
     text-align: left;
     border-left: 3px solid black;
@@ -18,8 +36,7 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
-    margin: var(--section-margin);
-    margin-right: 0;
+    margin: var(--big-cell-padding);
     width: var(--field-size);
     height: var(--field-size);
 }
@@ -61,7 +78,7 @@
 }
 
 .big-cell.draw {
-    background-color: var(--draw-color);
+    background-color: var(--color-draw);
 }
 
 .small-cell {

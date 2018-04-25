@@ -10,10 +10,19 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Ultimate Tic-Tac-Toe</h1>
+          <h1 className="App-title">Ultimate Tic-Tac-Toe game</h1>
           <span className="dummy" />
         </header>
-        <main>
+        <main className="App-content">
+          <p>
+            This is an implementation of AlphaZero player in JavaScript for Ultimate Tic-Tac-Toe game with neural
+             network running in the browser. Read more in our blog:
+            <a
+              href="https://blog.deepsense.ai/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >{'https://blog.deepsense.ai/'}</a>
+          </p>
           <UltimateTicTacToe />
         </main>
       </div>
