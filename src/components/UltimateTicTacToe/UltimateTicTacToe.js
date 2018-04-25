@@ -17,7 +17,8 @@ const RESULT_INDEX = 92
 const STATE_SIZE = 93
 const mapCodeToIcon = new Map([
   [X, <i className="fal fa-times" />],
-  [O, <i className="fal fa-circle" />]
+  [O, <i className="fal fa-circle" />],
+  [DRAW, <i className="fal fa-handshake" />]
 ])
 
 export default class UltimateTicTacToe extends Component {
@@ -39,9 +40,8 @@ export default class UltimateTicTacToe extends Component {
     return new UltimateTicTacToe(clone(this.state))
   }
 
-  execute(action) {
-    if (this.assertActionLegality(action)) {
-      const game = [...this.state.game]
+  execute(game, action) {
+    if (this.assertActionLegality(game, action)) {
       const { gameIndex, smallGameOffset, smallGameIndex, largeGameIndex } = this.extractIndices(action)
       const mark = game[TURN_INDEX]
 
@@ -49,9 +49,9 @@ export default class UltimateTicTacToe extends Component {
       game[TURN_INDEX] = mark === O ? X : O
       this.setResult(game, mark, smallGameOffset, largeGameIndex)
       this.setConstraint(game, smallGameIndex)
-
-      this.setState({ game })
     }
+
+    return game
   }
 
   isTerminated(game) {
@@ -115,7 +115,7 @@ export default class UltimateTicTacToe extends Component {
       indices = this.getEmptyIndices(game, offset)
     } else {
       range(81, 90).forEach((v, i) => {
-        if (!game[v]) {
+        if (game[v] === EMPTY) {
           indices = indices.concat(this.getEmptyIndices(game, 9 * i))
         }
       })
@@ -125,15 +125,15 @@ export default class UltimateTicTacToe extends Component {
   }
 
   getEmptyIndices(game, offset) {
-    return range(offset, offset + 9).filter(i => !game[i])
+    return range(offset, offset + 9).filter(i => game[i] === EMPTY)
   }
 
   hasWinningPosition(game, mark, offset) {
     return !!this.getLineIndices(game, mark, offset).length
   }
 
+  /* this method checks whether given state has winning position and returns them as an array */
   getLineIndices(game, mark, offset) {
-    /* this method checks whether given state has winning position and returns them as an array */
     const result = []
 
     if (mark === game[offset + 4]) {
@@ -152,8 +152,8 @@ export default class UltimateTicTacToe extends Component {
     return result
   }
 
+  /* game is considered as full when all positions are taken */
   isFull(game, offset) {
-    /* game is considered as full when all positions are taken */
     return every(range(offset, offset + 9), i => game[i])
   }
 
@@ -171,8 +171,8 @@ export default class UltimateTicTacToe extends Component {
     }
   }
 
+  /* result is assigned to a game when either of players won or all positions are taken */
   setResult(game, mark, smallGameOffset, largeGameIndex) {
-    /* result is assigned to a game when either of players won or all positions are taken */
     // check small game
     if (this.hasWinningPosition(game, mark, smallGameOffset)) {
       game[81 + largeGameIndex] = mark
@@ -187,15 +187,15 @@ export default class UltimateTicTacToe extends Component {
     }
   }
 
-  assertActionLegality(action) {
+  assertActionLegality(game, action) {
     const { gameIndex, /*smallGameOffset, smallGameIndex, */largeGameIndex } = this.extractIndices(action)
     const errors = []
 
-    if (this.isTerminated(this.state.game)) {
+    if (this.isTerminated(game)) {
       errors.push(`environment is terminated`)
     }
-    if (this.state.game[TURN_INDEX] !== action.turn) {
-      errors.push(`environment expects action with turn=${this.state.game[TURN_INDEX]}, but selected action has turn=${action.turn}`)
+    if (game[TURN_INDEX] !== action.turn) {
+      errors.push(`environment expects action with turn=${game[TURN_INDEX]}, but selected action has turn=${action.turn}`)
     }
     if (!(0 <= action.rowIndex && action.rowIndex < 9)) {
       errors.push(`rowIndex value = ${action.rowIndex} is out of the scope of the board`)
@@ -203,14 +203,14 @@ export default class UltimateTicTacToe extends Component {
     if (!(0 <= action.colIndex && action.colIndex < 9)) {
       errors.push(`colIndex value = ${action.colIndex} is out of the scope of the board`)
     }
-    if (this.state.game[CONSTRAINT_INDEX] !== 0 && largeGameIndex !== this.state.game[CONSTRAINT_INDEX] - 1) {
-      errors.push(`next move is under constraint=${this.state.game[CONSTRAINT_INDEX] -
+    if (game[CONSTRAINT_INDEX] !== 0 && largeGameIndex !== game[CONSTRAINT_INDEX] - 1) {
+      errors.push(`next move is under constraint=${game[CONSTRAINT_INDEX] -
       1}, but selected action points to ${largeGameIndex}`)
     }
-    if (this.state.game[81 + largeGameIndex]) {
+    if (game[81 + largeGameIndex]) {
       errors.push(`selected sub-game=${largeGameIndex} is finished`)
     }
-    if (this.state.game[gameIndex]) {
+    if (game[gameIndex]) {
       errors.push(`cell (rowIndex=${action.rowIndex}, colIndex=${action.colIndex}) is already taken`)
     }
 
@@ -220,7 +220,11 @@ export default class UltimateTicTacToe extends Component {
   }
 
   handleCellClick(rowIndex, colIndex) {
-    this.execute(new Action(rowIndex, colIndex, this.state.game[TURN_INDEX]))
+    const game = [...this.state.game]
+
+    this.setState({
+      game: this.execute(game, new Action(rowIndex, colIndex, game[TURN_INDEX]))
+    })
   }
 
   render() {
@@ -228,35 +232,32 @@ export default class UltimateTicTacToe extends Component {
     const turn = game[TURN_INDEX]
     const result = game[RESULT_INDEX]
     const constraint = game[CONSTRAINT_INDEX]
+    const isTerminated = this.isTerminated(game)
     const possibleIndices = this.getPossibleIndices(game)
 
     console.log('/----------------')
     console.log('game:', game)
-    console.log('turn:', turn)
-    console.log('constraint:', constraint)
     console.log('possible indices:', possibleIndices)
-    console.log('is large game full:', this.isFull(game, 81))
-    console.log('is terminated:', this.isTerminated(game))
-    console.log('result:', result)
     console.log('----------------/')
 
     return (
-      <div
-        className={classnames("big_field field", {
+      <div className="uttt">
+        <div
+          className={classnames("big-field field", {
           playerXTurn: turn === X,
           playerOTurn: turn === O,
-          finished: this.isTerminated(game)
+          finished: isTerminated
       })}
-      >
-        {
-          game.slice(81, 90).map((v, i) => {
-            const lineX = this.getLineIndices(game, X, i * 9)
-            const lineO = this.getLineIndices(game, O, i * 9)
+        >
+          {
+            game.slice(81, 90).map((v, i) => {
+              const lineX = this.getLineIndices(game, X, i * 9)
+              const lineO = this.getLineIndices(game, O, i * 9)
 
-            return (
-              <div
-                key={i}
-                className={classnames("big_cell cell", {
+              return (
+                <div
+                  key={i}
+                  className={classnames("big-cell cell", {
                   top: i < 3,
                   middle: 3 <= i && i < 6,
                   bottom: 6 <= i,
@@ -267,17 +268,17 @@ export default class UltimateTicTacToe extends Component {
                   playerO: v === O,
                   draw: v === DRAW
                 })}
-              >
-                <div className="small_field field">
-                  {
-                    game.slice(i * 9, i * 9 + 9).map((w, j) => {
-                      const index = i * 9 + j
-                      const { rowIndex, colIndex } = this.convertToRC(index)
+                >
+                  <div className="small-field field">
+                    {
+                      game.slice(i * 9, i * 9 + 9).map((w, j) => {
+                        const index = i * 9 + j
+                        const { rowIndex, colIndex } = this.convertToRC(index)
 
-                      return (
-                        <div
-                          key={index}
-                          className={classnames("small_cell cell", {
+                        return (
+                          <div
+                            key={index}
+                            className={classnames("small-cell cell", {
                             top: j < 3,
                             middle: 3 <= j && j < 6,
                             bottom: 6 <= j,
@@ -290,19 +291,26 @@ export default class UltimateTicTacToe extends Component {
                             makesLineX: indexOf(lineX, index) > -1,
                             makesLineO: indexOf(lineO, index) > -1
                           })}
-                          onClick={() => this.handleCellClick(rowIndex, colIndex)}
-                        >
-                          {/*{index} {81 + i}<br />{v} {w}<br />{j} {rowIndex} {colIndex}*/}
-                          {mapCodeToIcon.get(w) || null}
-                        </div>
-                      )
-                    })
-                  }
+                            onClick={() => this.handleCellClick(rowIndex, colIndex)}
+                          >
+                            {/*{index} {81 + i}<br />{v} {w}<br />{j} {rowIndex} {colIndex}*/}
+                            {mapCodeToIcon.get(w) || null}
+                          </div>
+                        )
+                      })
+                    }
+                  </div>
                 </div>
-              </div>
-            )
-          })
-        }
+              )
+            })
+          }
+        </div>
+        <ul className="game-panel">
+          <li><strong>Turn:</strong> {turn === X ? 'X' : 'O'}</li>
+          <li><strong>Constraint:</strong> {constraint || 'any free cell'}</li>
+          <li><strong>Finished:</strong> {isTerminated ? 'yes' : 'no'}</li>
+          <li><strong>Winner:</strong> {mapCodeToIcon.get(result) || 'not yet'}</li>
+        </ul>
       </div>
     )
   }

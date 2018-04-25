@@ -3,7 +3,7 @@
     --big-cell-padding: 24px;
     --big-cell-border-width: 3px;
     --cell-size: calc((var(--field-size) - var(--big-cell-padding) * 6 - var(--big-cell-border-width) * 2) / 9);
-    --black: #000000;
+    --section-margin: calc(var(--big-cell-padding) + var(--cell-size));
     --playerX-color-dark: #990033;
     --playerX-color: #ff0066;
     --playerX-color-light: #ff99cc;
@@ -38,6 +38,10 @@ ol, ul {
 table {
     border-collapse: collapse;
     border-spacing: 0;
+}
+
+strong {
+    font-weight: bold;
 }
 
 * {

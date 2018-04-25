@@ -1,20 +1,37 @@
-.big_field {
+.uttt {
+    display: flex;
+    justify-content: center;
+}
+
+.game-panel {
+    flex-shrink: 0;
+    margin: var(--section-margin);
+    margin-left: calc(var(--field-size) / 3);
+    padding: var(--big-cell-padding);
+    width: calc(var(--field-size) / 3 * 2);
+    line-height: 1.5em;
+    text-align: left;
+    border-left: 3px solid black;
+}
+
+.big-field {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
-    margin: 30px auto;
+    margin: var(--section-margin);
+    margin-right: 0;
     width: var(--field-size);
     height: var(--field-size);
 }
 
-.small_field {
+.small-field {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
 }
 
 .cell {
-    border-color: var(--black);
+    border-color: black;
     font-family: monospace;
     font-size: 9px;
     line-height: 12px;
@@ -30,24 +47,24 @@
     border-bottom: 1px solid;
 }
 
-.big_cell.cell {
+.big-cell.cell {
     border-width: var(--big-cell-border-width);
     padding: var(--big-cell-padding);
 }
 
-.big_cell.playerX {
+.big-cell.playerX {
     background-color: var(--playerX-color-light);
 }
 
-.big_cell.playerO {
+.big-cell.playerO {
     background-color: var(--playerO-color-light);
 }
 
-.big_cell.draw {
+.big-cell.draw {
     background-color: var(--draw-color);
 }
 
-.small_cell {
+.small-cell {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -55,50 +72,50 @@
     height: var(--cell-size);
 }
 
-.small_cell .fa-times {
+.small-cell .fa-times {
     font-size: 30px;
 }
 
-.small_cell .fa-circle {
+.small-cell .fa-circle {
     font-size: 24px;
 }
 
-.small_cell.playerX {
+.small-cell.playerX {
     background-color: var(--playerX-color);
 }
 
-.small_cell.playerO {
+.small-cell.playerO {
     background-color: var(--playerO-color);
 }
 
-.small_cell.playerX.makesLineX {
+.small-cell.playerX.makesLineX {
     background-color: var(--playerX-color-dark);
 }
 
-.small_cell.playerO.makesLineO {
+.small-cell.playerO.makesLineO {
     background-color: var(--playerO-color-dark);
 }
 
-.small_cell.possible {
+.small-cell.possible {
     cursor: pointer;
     animation-duration: 2.2s;
     animation-iteration-count: infinite;
     animation-timing-function: ease-in;
 }
 
-.playerXTurn .small_cell.possible {
+.playerXTurn .small-cell.possible {
     animation-name: blinkPlayerX;
 }
 
-.playerOTurn .small_cell.possible {
+.playerOTurn .small-cell.possible {
     animation-name: blinkPlayerO;
 }
 
-.finished.playerXTurn .small_cell.possible {
+.finished.playerXTurn .small-cell.possible {
     animation-name: none;
 }
 
-.finished.playerOTurn .small_cell.possible {
+.finished.playerOTurn .small-cell.possible {
     animation-name: none;
 }
 
