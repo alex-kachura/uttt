@@ -2,34 +2,33 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin: var(--big-cell-padding) 0;
 }
 
 .uttt-start {
     font-size: 1em;
     border: none;
-    margin-top: var(--big-cell-padding);
     padding: 10px 15px;
     line-height: 1em;
     text-transform: uppercase;
     cursor: pointer;
     color: white;
-    background-color: #00B1EB;
+    background-color: var(--color-button-default);
+}
+
+.uttt-result {
+    display: flex;
+    align-items: center;
+}
+
+.uttt-result .svg-inline--fa {
+    margin-right: 10px;
 }
 
 .uttt-game {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-}
-
-.game-panel {
-    flex-shrink: 0;
-    margin: var(--big-cell-padding) 0 var(--big-cell-padding) calc(var(--field-size) / 3);
-    padding: var(--big-cell-padding);
-    width: calc(var(--field-size) / 3 * 2 + var(--big-cell-border-width) * 2);
-    line-height: 1.5em;
-    text-align: left;
-    border-left: 3px solid black;
 }
 
 .big-field {
@@ -70,11 +69,11 @@
 }
 
 .big-cell.playerX {
-    background-color: var(--playerX-color-light);
+    background-color: var(--playerX-color);
 }
 
 .big-cell.playerO {
-    background-color: var(--playerO-color-light);
+    background-color: var(--playerO-color);
 }
 
 .big-cell.draw {
@@ -89,12 +88,12 @@
     height: var(--cell-size);
 }
 
-.small-cell .fa-times {
-    font-size: 30px;
+.fa-times {
+    font-size: var(--cell-size);
 }
 
-.small-cell .fa-circle {
-    font-size: 24px;
+.fa-circle {
+    font-size: calc(var(--cell-size) / 1.3);
 }
 
 .small-cell.playerX {
@@ -103,14 +102,6 @@
 
 .small-cell.playerO {
     background-color: var(--playerO-color);
-}
-
-.small-cell.playerX.makesLineX {
-    background-color: var(--playerX-color-dark);
-}
-
-.small-cell.playerO.makesLineO {
-    background-color: var(--playerO-color-dark);
 }
 
 .small-cell.possible {
@@ -126,14 +117,6 @@
 
 .playerOTurn .small-cell.possible {
     animation-name: blinkPlayerO;
-}
-
-.finished.playerXTurn .small-cell.possible {
-    animation-name: none;
-}
-
-.finished.playerOTurn .small-cell.possible {
-    animation-name: none;
 }
 
 @keyframes blinkPlayerX {

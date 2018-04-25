@@ -1,12 +1,5 @@
-.App-logo {
-    width: 210px;
-    height: 49px;
-}
-
 .App-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    text-align: center;
     padding: var(--big-cell-padding);
     color: black;
 }
@@ -15,11 +8,6 @@
     flex-shrink: 0;
     font-size: 1.5em;
     text-align: center;
-}
-
-.dummy {
-    flex-shrink: 1;
-    width: 257px;
 }
 
 .App-content p {

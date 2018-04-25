@@ -4,21 +4,12 @@
     --big-cell-border-width: 3px;
     --cell-size: calc((var(--field-size) - var(--big-cell-padding) * 6 - var(--big-cell-border-width) * 2) / 9);
 
-    --playerX-color-dark: #990033;
     --playerX-color: #ff0066;
     --playerX-color-light: #ff99cc;
-    --playerO-color-dark: #3333cc;
     --playerO-color: #0099ff;
     --playerO-color-light: #99ccff;
     --color-draw: #ffff99;
-
-    /*--playerX-color-dark: #b0de00;*/
-    /*--playerX-color: #fc5801;*/
-    /*--playerX-color-light: #fab001;*/
-    /*--playerO-color-dark: var(--playerX-color-dark);*/
-    /*--playerO-color: #0071BA;*/
-    /*--playerO-color-light: #00B1EB;*/
-    /*--color-draw: #43cd92;*/
+    --color-button-default: #3399ff;
 }
 
 html, body, div, span, h1, h2, h3, h4, h5, h6, p, pre, a, big, code, em, img, small, strong, b, u, i, ul, li,

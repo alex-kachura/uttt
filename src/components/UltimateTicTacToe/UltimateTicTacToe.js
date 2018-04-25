@@ -1,11 +1,13 @@
 import React, { Component } from 'react'
 import classnames from 'classnames'
+import isEmpty from 'lodash/isEmpty'
 import range from 'lodash/range'
 import indexOf from 'lodash/indexOf'
 import every from 'lodash/every'
-import random from 'lodash/random'
 
 import { Action, X, O, DRAW, EMPTY } from './Action'
+import Player from './Player'
+// import { XWon, OWon, draw } from '../../mocks'
 import './UltimateTicTacToe.css'
 
 // state encoding:
@@ -20,6 +22,9 @@ const mapCodeToIcon = new Map([
   [O, <i className="fal fa-circle" />],
   [DRAW, <i className="fal fa-handshake" />]
 ])
+
+let utttKey = 0 // used to remount the React component
+let player
 
 export default class UltimateTicTacToe extends Component {
   constructor(...args) {
@@ -40,12 +45,8 @@ export default class UltimateTicTacToe extends Component {
     return { game }
   }
 
-  getState() {
-    return [...this.state.game]
-  }
-
-  clone() {
-    return new UltimateTicTacToe({ ...this.state })
+  componentDidMount() {
+    player = new Player(this)
   }
 
   execute(game, action) {
@@ -196,7 +197,11 @@ export default class UltimateTicTacToe extends Component {
   }
 
   assertActionLegality(game, action) {
-    const { gameIndex, /*smallGameOffset, smallGameIndex, */largeGameIndex } = this.extractIndices(action)
+    if (isEmpty(action)) {
+      return false
+    }
+
+    const { gameIndex, largeGameIndex } = this.extractIndices(action)
     const errors = []
 
     if (this.isTerminated(game)) {
@@ -227,12 +232,6 @@ export default class UltimateTicTacToe extends Component {
     return !errors.length
   }
 
-  randomPlayerAction(game) {
-    const actions = this.getPossibleActions(game)
-
-    return actions[random(actions.length - 1)]
-  }
-
   handleCellClick(rowIndex, colIndex) {
     const game = [...this.state.game]
     const action = new Action(rowIndex, colIndex, game[TURN_INDEX])
@@ -240,7 +239,7 @@ export default class UltimateTicTacToe extends Component {
     this.execute(game, action) &&
     this.setState({ game }, () => {
       const game = [...this.state.game]
-      const action = this.randomPlayerAction(game)
+      const action = player.getAction()
 
       this.execute(game, action) &&
       this.setState({ game })
@@ -248,6 +247,7 @@ export default class UltimateTicTacToe extends Component {
   }
 
   startNewGame() {
+    utttKey++
     this.setState(this.getInitialState())
   }
 
@@ -255,31 +255,26 @@ export default class UltimateTicTacToe extends Component {
     const { game } = this.state
     const turn = game[TURN_INDEX]
     const result = game[RESULT_INDEX]
-    const constraint = game[CONSTRAINT_INDEX]
     const isTerminated = this.isTerminated(game)
     const possibleIndices = this.getPossibleIndices(game)
 
     return (
-      <div className="uttt">
-        <button className="uttt-start" onClick={() => this.startNewGame()}>Start new game</button>
+      <div className="uttt" key={utttKey}>
+        <button className="uttt-start" onClick={() => this.startNewGame()}>New game</button>
 
-        <div className="uttt-game">
-          <div
-            className={classnames("big-field field", {
+        <div
+          className={classnames("uttt-game big-field field", {
           playerXTurn: turn === X,
           playerOTurn: turn === O,
           finished: isTerminated
       })}
-          >
-            {
-              game.slice(81, 90).map((v, i) => {
-                const lineX = this.getLineIndices(game, X, i * 9)
-                const lineO = this.getLineIndices(game, O, i * 9)
-
-                return (
-                  <div
-                    key={i}
-                    className={classnames("big-cell cell", {
+        >
+          {
+            game.slice(81, 90).map((v, i) => {
+              return (
+                <div
+                  key={i}
+                  className={classnames("big-cell cell", {
                   top: i < 3,
                   middle: 3 <= i && i < 6,
                   bottom: 6 <= i,
@@ -290,51 +285,49 @@ export default class UltimateTicTacToe extends Component {
                   playerO: v === O,
                   draw: v === DRAW
                 })}
-                  >
-                    <div className="small-field field">
-                      {
-                        game.slice(i * 9, i * 9 + 9).map((w, j) => {
-                          const index = i * 9 + j
-                          const { rowIndex, colIndex } = this.convertToRC(index)
+                >
+                  <div className="small-field field">
+                    {
+                      game.slice(i * 9, i * 9 + 9).map((w, j) => {
+                        const index = i * 9 + j
+                        const { rowIndex, colIndex } = this.convertToRC(index)
 
-                          return (
-                            <div
-                              key={index}
-                              className={classnames("small-cell cell", {
+                        return (
+                          <div
+                            key={index}
+                            className={classnames("small-cell cell", {
                             top: j < 3,
                             middle: 3 <= j && j < 6,
                             bottom: 6 <= j,
                             left: !(j % 3),
                             center: !((j - 1) % 3),
                             right: !((j - 2) % 3),
-                            possible: indexOf(possibleIndices, index) > -1,
-                            playerX: w === X,
-                            playerO: w === O,
-                            makesLineX: indexOf(lineX, index) > -1,
-                            makesLineO: indexOf(lineO, index) > -1
+                            possible: !isTerminated && indexOf(possibleIndices, index) > -1,
+                            playerX: v === EMPTY && w === X,
+                            playerO: v === EMPTY && w === O
                           })}
-                              onClick={() => this.handleCellClick(rowIndex, colIndex)}
-                            >
-                              {/*{index} {81 + i}<br />{v} {w}<br />{j} {rowIndex} {colIndex}*/}
-                              {mapCodeToIcon.get(w) || null}
-                            </div>
-                          )
-                        })
-                      }
-                    </div>
+                            onClick={() => this.handleCellClick(rowIndex, colIndex)}
+                          >
+                            {/*{index} {81 + i}<br />{v} {w}<br />{j} {rowIndex} {colIndex}*/}
+                            {mapCodeToIcon.get(w) || null}
+                          </div>
+                        )
+                      })
+                    }
                   </div>
-                )
-              })
-            }
-          </div>
-
-          <ul className="game-panel">
-            {!isTerminated ? <li><strong>Turn:</strong> {turn === X ? 'X' : 'O'}</li> : null}
-            {!isTerminated ? <li><strong>Constraint:</strong> {constraint || 'any free cell'}</li> : null}
-            <li><strong>Finished:</strong> {isTerminated ? 'yes' : 'no'}</li>
-            {isTerminated ? <li><strong>Winner:</strong> {mapCodeToIcon.get(result)}</li> : null}
-          </ul>
+                </div>
+              )
+            })
+          }
         </div>
+
+        {
+          isTerminated ?
+            result === DRAW ?
+              <div className="uttt-result">Draw!</div> :
+              <div className="uttt-result">{mapCodeToIcon.get(result)} wins!</div> :
+            null
+        }
       </div>
     )
   }
