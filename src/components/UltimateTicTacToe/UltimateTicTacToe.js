@@ -30,23 +30,28 @@ export default class UltimateTicTacToe extends Component {
   constructor(...args) {
     super(...args)
 
-    if (args.state) {
-      this.state = args.state
-    } else {
-      this.state = this.getInitialState()
-    }
+    this.state = this.getInitialState()
   }
 
-  getInitialState() {
+  getInitialState(playAs = X) {
     const game = new Array(STATE_SIZE).fill(EMPTY)
 
     game[TURN_INDEX] = X
 
-    return { game }
+    return { game, playAs }
   }
 
   componentDidMount() {
     player = new Player(this)
+  }
+
+  startNewGame() {
+    utttKey++
+    this.setState(this.getInitialState(this.state.playAs), () => {
+      if (this.state.playAs === O) {
+        this.computerTurn()
+      }
+    })
   }
 
   execute(game, action) {
@@ -232,27 +237,26 @@ export default class UltimateTicTacToe extends Component {
     return !errors.length
   }
 
+  chooseSide(playAs) {
+    this.setState({ playAs })
+  }
+
   handleCellClick(rowIndex, colIndex) {
     const game = [...this.state.game]
     const action = new Action(rowIndex, colIndex, game[TURN_INDEX])
 
-    this.execute(game, action) &&
-    this.setState({ game }, () => {
-      const game = [...this.state.game]
-      const action = player.getAction()
-
-      this.execute(game, action) &&
-      this.setState({ game })
-    })
+    this.execute(game, action) && this.setState({ game }, this.computerTurn)
   }
 
-  startNewGame() {
-    utttKey++
-    this.setState(this.getInitialState())
+  computerTurn() {
+    const game = [...this.state.game]
+    const action = player.getAction()
+
+    this.execute(game, action) && this.setState({ game })
   }
 
   render() {
-    const { game } = this.state
+    const { game, playAs } = this.state
     const turn = game[TURN_INDEX]
     const result = game[RESULT_INDEX]
     const isTerminated = this.isTerminated(game)
@@ -260,10 +264,20 @@ export default class UltimateTicTacToe extends Component {
 
     return (
       <div className="uttt" key={utttKey}>
-        <button className="uttt-start" onClick={() => this.startNewGame()}>New game</button>
+        <div className="start">
+          <span
+            className={classnames("play-as", { active: playAs === X })}
+            onClick={() => this.chooseSide(X)}
+          >Play as {mapCodeToIcon.get(X)}</span>
+          <span
+            className={classnames("play-as", { active: playAs === O })}
+            onClick={() => this.chooseSide(O)}
+          >Play as {mapCodeToIcon.get(O)}</span>
+          <button onClick={() => this.startNewGame()}>New game</button>
+        </div>
 
         <div
-          className={classnames("uttt-game big-field field", {
+          className={classnames("big-field field", {
           playerXTurn: turn === X,
           playerOTurn: turn === O,
           finished: isTerminated
@@ -324,8 +338,8 @@ export default class UltimateTicTacToe extends Component {
         {
           isTerminated ?
             result === DRAW ?
-              <div className="uttt-result">Draw!</div> :
-              <div className="uttt-result">{mapCodeToIcon.get(result)} wins!</div> :
+              <div className="result">Draw!</div> :
+              <div className="result">{mapCodeToIcon.get(result)} wins!</div> :
             null
         }
       </div>
