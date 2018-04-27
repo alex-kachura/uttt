@@ -3,11 +3,12 @@
     --big-cell-padding: 24px;
     --big-cell-border-width: 3px;
     --cell-size: calc((var(--field-size) - var(--big-cell-padding) * 6 - var(--big-cell-border-width) * 2) / 9);
-
-    --playerX-color: #ff0066;
-    --playerX-color-light: #ff99cc;
-    --playerO-color: #0099ff;
-    --playerO-color-light: #99ccff;
+    --color-hover: #f5f5f5;
+    --color-active: #eaeaea;
+    --color-playerX: #ff0066;
+    --color-playerX-light: #ff99cc;
+    --color-playerO: #0099ff;
+    --color-playerO-light: #99ccff;
     --color-draw: #ffff99;
     --color-button-default: #3399ff;
 }

@@ -32,11 +32,11 @@
 }
 
 .play-as:hover {
-    background-color: #f5f5f5;
+    background-color: var(--color-hover);
 }
 
 .play-as.active {
-    background-color: #ececec;
+    background-color: var(--color-active);
 }
 
 .play-as .svg-inline--fa {
@@ -86,11 +86,11 @@
 }
 
 .big-cell.playerX {
-    background-color: var(--playerX-color);
+    background-color: var(--color-playerX);
 }
 
 .big-cell.playerO {
-    background-color: var(--playerO-color);
+    background-color: var(--color-playerO);
 }
 
 .big-cell.draw {
@@ -114,11 +114,11 @@
 }
 
 .small-cell.playerX {
-    background-color: var(--playerX-color);
+    background-color: var(--color-playerX);
 }
 
 .small-cell.playerO {
-    background-color: var(--playerO-color);
+    background-color: var(--color-playerO);
 }
 
 .small-cell.possible {
@@ -147,24 +147,24 @@
 
 @keyframes blinkPlayerX {
     0% {
-        background-color: var(--playerX-color-light);
+        background-color: var(--color-playerX-light);
     }
     50% {
         background-color: white;
     }
     100% {
-        background-color: var(--playerX-color-light);
+        background-color: var(--color-playerX-light);
     }
 }
 
 @keyframes blinkPlayerO {
     0% {
-        background-color: var(--playerO-color-light);
+        background-color: var(--color-playerO-light);
     }
     50% {
         background-color: white;
     }
     100% {
-        background-color: var(--playerO-color-light);
+        background-color: var(--color-playerO-light);
     }
 }
