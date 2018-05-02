@@ -322,8 +322,7 @@ export default class UltimateTicTacToe extends Component {
                           })}
                             onClick={() => this.handleCellClick(rowIndex, colIndex)}
                           >
-                            {/*{index} {81 + i}<br />{v} {w}<br />{j} {rowIndex} {colIndex}*/}
-                            {mapCodeToIcon.get(w) || null}
+                            {mapCodeToIcon.get(w) || (player && player.getProbability(index)) || null}
                           </div>
                         )
                       })

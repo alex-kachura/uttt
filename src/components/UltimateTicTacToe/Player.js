@@ -16,4 +16,10 @@ export default class Player {
 
     return actions[random(actions.length - 1)]
   }
+
+  getProbability(index) {
+    this.updateState()
+
+    return `${index}%`
+  }
 }
