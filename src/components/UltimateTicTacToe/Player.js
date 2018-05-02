@@ -1,4 +1,5 @@
 import random from 'lodash/random'
+import indexOf from 'lodash/indexOf'
 
 export default class Player {
   constructor(uttt) {
@@ -20,6 +21,6 @@ export default class Player {
   getProbability(index) {
     this.updateState()
 
-    return `${index}%`
+    return indexOf(this.uttt.getPossibleIndices(this.state), index) > -1 ? `${index}%` : null
   }
 }

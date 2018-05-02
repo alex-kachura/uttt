@@ -168,7 +168,7 @@ export default class UltimateTicTacToe extends Component {
 
   /* game is considered as full when all positions are taken */
   isFull(game, offset) {
-    return every(range(offset, offset + 9), i => game[i])
+    return every(range(offset, offset + 9), i => game[i] !== EMPTY)
   }
 
   setConstraint(game, index) {
