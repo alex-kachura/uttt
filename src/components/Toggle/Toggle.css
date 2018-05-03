@@ -1,0 +1,38 @@
+.toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.toggle .children {
+    margin-left: .5em;
+}
+
+.toggle label {
+    display: inline-flex;
+}
+
+.toggle .svg-inline--fa + label, .toggle label + .svg-inline--fa {
+    margin-left: 10px;
+}
+
+.toggle .flipped {
+    transform: scale(-1, 1);
+}
+
+.toggle input[type=checkbox] {
+    display: none;
+}
+
+.toggle input[type=checkbox] + .svg-inline--fa {
+    display: none;
+}
+
+.toggle input[type=checkbox]:checked + .svg-inline--fa {
+    display: initial;
+}
+
+.toggle input[type=checkbox]:checked + .svg-inline--fa + .svg-inline--fa {
+    display: none;
+}

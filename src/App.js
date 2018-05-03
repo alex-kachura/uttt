@@ -13,7 +13,7 @@ class App extends Component {
         <main className="App-content">
           <p>
             This is an implementation of AlphaZero player in JavaScript for Ultimate Tic-Tac-Toe game with neural
-             network running in the browser. Read more in our blog:
+             network running in the browser. Read more in our blog:{' '}
             <a
               href="https://blog.deepsense.ai/"
               target="_blank"

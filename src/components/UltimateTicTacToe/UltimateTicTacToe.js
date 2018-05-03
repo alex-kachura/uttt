@@ -8,6 +8,8 @@ import every from 'lodash/every'
 import { Action, X, O, DRAW, EMPTY } from './Action'
 import Player from './Player'
 // import { XWon, OWon, draw } from '../../mocks'
+import Toggle from '../Toggle/Toggle'
+import Modal from '../Modal/Modal'
 import './UltimateTicTacToe.css'
 
 // state encoding:
@@ -31,14 +33,24 @@ export default class UltimateTicTacToe extends Component {
     super(...args)
 
     this.state = this.getInitialState()
+
+    this.toggleHints = this.toggleHints.bind(this)
+    this.startNewGame = this.startNewGame.bind(this)
+    this.openModal = this.openModal.bind(this)
+    this.closeModal = this.closeModal.bind(this)
   }
 
-  getInitialState(playAs = X) {
+  getInitialState(playAs = X, isShowHints = true) {
     const game = new Array(STATE_SIZE).fill(EMPTY)
 
     game[TURN_INDEX] = X
 
-    return { game, playAs }
+    return {
+      game,
+      playAs,
+      isShowHints,
+      isChooseSideModalShown: false
+    }
   }
 
   componentDidMount() {
@@ -47,7 +59,7 @@ export default class UltimateTicTacToe extends Component {
 
   startNewGame() {
     utttKey++
-    this.setState(this.getInitialState(this.state.playAs), () => {
+    this.setState(this.getInitialState(this.state.playAs, this.state.isShowHints), () => {
       if (this.state.playAs === O) {
         this.computerTurn()
       }
@@ -237,8 +249,8 @@ export default class UltimateTicTacToe extends Component {
     return !errors.length
   }
 
-  chooseSide(playAs) {
-    this.setState({ playAs })
+  playAs(playAs) {
+    this.setState({ playAs }, this.startNewGame)
   }
 
   handleCellClick(rowIndex, colIndex) {
@@ -255,8 +267,20 @@ export default class UltimateTicTacToe extends Component {
     this.execute(game, action) && this.setState({ game })
   }
 
+  toggleHints() {
+    this.setState({ isShowHints: !this.state.isShowHints })
+  }
+
+  openModal() {
+    this.setState({ isChooseSideModalShown: true })
+  }
+
+  closeModal() {
+    this.setState({ isChooseSideModalShown: false });
+  }
+
   render() {
-    const { game, playAs } = this.state
+    const { game, isShowHints } = this.state
     const turn = game[TURN_INDEX]
     const result = game[RESULT_INDEX]
     const isTerminated = this.isTerminated(game)
@@ -264,20 +288,12 @@ export default class UltimateTicTacToe extends Component {
 
     return (
       <div className="uttt" key={utttKey}>
-        <div className="start">
-          <span
-            className={classnames("play-as", { active: playAs === X })}
-            onClick={() => this.chooseSide(X)}
-          >Play as {mapCodeToIcon.get(X)}</span>
-          <span
-            className={classnames("play-as", { active: playAs === O })}
-            onClick={() => this.chooseSide(O)}
-          >Play as {mapCodeToIcon.get(O)}</span>
-          <button onClick={() => this.startNewGame()}>New game</button>
-        </div>
+        <Toggle checked={isShowHints} onChange={this.toggleHints}>Show hints</Toggle>
+
+        <button className="btn-primary" onClick={this.openModal}>New Game</button>
 
         <div
-          className={classnames("big-field field", {
+          className={classnames("game big-field field", {
           playerXTurn: turn === X,
           playerOTurn: turn === O,
           finished: isTerminated
@@ -322,7 +338,7 @@ export default class UltimateTicTacToe extends Component {
                           })}
                             onClick={() => this.handleCellClick(rowIndex, colIndex)}
                           >
-                            {mapCodeToIcon.get(w) || (player && player.getProbability(index)) || null}
+                            {mapCodeToIcon.get(w) || (isShowHints && !isTerminated && player && player.getProbability(index)) || null}
                           </div>
                         )
                       })
@@ -341,6 +357,15 @@ export default class UltimateTicTacToe extends Component {
               <div className="result">{mapCodeToIcon.get(result)} wins!</div> :
             null
         }
+
+        <Modal
+          isShown={this.state.isChooseSideModalShown}
+          onClose={this.closeModal}
+          className="play-as-modal"
+        >
+          <div className="play-as" onClick={() => this.playAs(X)}>Play as {mapCodeToIcon.get(X)}</div>
+          <div className="play-as" onClick={() => this.playAs(O)}>Play as {mapCodeToIcon.get(O)}</div>
+        </Modal>
       </div>
     )
   }

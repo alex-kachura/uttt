@@ -1,0 +1,35 @@
+.modal {
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, .8);
+}
+
+.modal__window {
+    position: relative;
+    background-color: white;
+    box-shadow: 3px 3px 15px 1px rgba(0, 0, 0, .6);
+}
+
+.modal__close {
+    position: absolute;
+    width: 1em;
+    height: 1em;
+    margin: .3em;
+    text-align: center;
+    right: 0;
+    top: 0;
+    cursor: pointer;
+    color: #8A8A8A;
+}
+
+.modal__close:hover {
+    color: #000000;
+}

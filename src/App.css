@@ -14,3 +14,18 @@
     padding: 0 var(--big-cell-padding);
     line-height: 1.5em;
 }
+
+.btn-primary {
+    font-size: 1em;
+    border: none;
+    padding: 0.67em 1em;
+    line-height: 1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: white;
+    background-color: var(--color-button-default);
+}
+
+.btn-primary:hover {
+    background-color: var(--color-button-default-hover);
+}

@@ -11,6 +11,7 @@
     --color-playerO-light: #99ccff;
     --color-draw: #ffff99;
     --color-button-default: #3399ff;
+    --color-button-default-hover: #2e8ae6;
 }
 
 html, body, div, span, h1, h2, h3, h4, h5, h6, p, pre, a, big, code, em, img, small, strong, b, u, i, ul, li,

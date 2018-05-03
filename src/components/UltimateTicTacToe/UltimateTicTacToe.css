@@ -2,57 +2,27 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: var(--big-cell-padding) 0;
-}
-
-.start {
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
+    margin: var(--big-cell-padding) auto;
     width: var(--field-size);
 }
 
-.start button {
-    font-size: 1em;
-    border: none;
-    padding: 10px 15px;
-    line-height: 1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    color: white;
-    background-color: var(--color-button-default);
+.uttt .toggle {
+    align-self: flex-start;
 }
 
-.play-as {
-    display: flex;
-    align-items: center;
-    padding: 0 15px;
-    height: 36px;
-    cursor: pointer;
+.uttt .toggle .svg-inline--fa {
+    font-size: 1.5em;
 }
 
-.play-as:hover {
-    background-color: var(--color-hover);
-}
-
-.play-as.active {
-    background-color: var(--color-active);
-}
-
-.play-as .svg-inline--fa {
-    font-size: 22px;
-    margin-left: 7px;
-}
-
-.play-as .svg-inline--fa.fa-times {
-    font-size: 26px;
+.uttt .btn-primary {
+    margin-top: 1em;
 }
 
 .big-field {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
-    margin: var(--big-cell-padding);
+    margin-top: 1em;
     width: var(--field-size);
     height: var(--field-size);
 }
@@ -105,11 +75,13 @@
     height: var(--cell-size);
 }
 
-.fa-times {
+.game .fa-times,
+.result .fa-times {
     font-size: var(--cell-size);
 }
 
-.fa-circle {
+.game .fa-circle,
+.result .fa-circle {
     font-size: calc(var(--cell-size) / 1.3);
 }
 
@@ -123,48 +95,48 @@
 
 .small-cell.possible {
     cursor: pointer;
-    animation-duration: 2.2s;
-    animation-iteration-count: infinite;
-    animation-timing-function: ease-in;
 }
 
 .playerXTurn .small-cell.possible {
-    animation-name: blinkPlayerX;
+    background-color: var(--color-playerX-light);
 }
 
 .playerOTurn .small-cell.possible {
-    animation-name: blinkPlayerO;
+    background-color: var(--color-playerO-light);
 }
 
 .result {
     display: flex;
     align-items: center;
+    margin-top: 1em;
 }
 
 .result .svg-inline--fa {
     margin-right: 10px;
 }
 
-@keyframes blinkPlayerX {
-    0% {
-        background-color: var(--color-playerX-light);
-    }
-    50% {
-        background-color: white;
-    }
-    100% {
-        background-color: var(--color-playerX-light);
-    }
+.play-as-modal {
+    display: flex;
+    padding: 2em;
 }
 
-@keyframes blinkPlayerO {
-    0% {
-        background-color: var(--color-playerO-light);
-    }
-    50% {
-        background-color: white;
-    }
-    100% {
-        background-color: var(--color-playerO-light);
-    }
+.play-as {
+    display: flex;
+    align-items: center;
+    padding: 0 1em;
+    height: 36px;
+    cursor: pointer;
+}
+
+.play-as:hover {
+    background-color: var(--color-hover);
+}
+
+.play-as .svg-inline--fa {
+    font-size: 22px;
+    margin-left: 7px;
+}
+
+.play-as .svg-inline--fa.fa-times {
+    font-size: 26px;
 }
