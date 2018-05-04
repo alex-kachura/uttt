@@ -1,11 +1,11 @@
 :root {
-    --field-size: 500px;
+    --field-size: 498px;
     --big-cell-padding: 24px;
     --big-cell-border-width: 3px;
     --cell-size: calc((var(--field-size) - var(--big-cell-padding) * 6 - var(--big-cell-border-width) * 2) / 9);
     --color-close: #afafaf;
-    --color-button-default: #00cc00;
-    --color-button-default-hover: #009900;
+    --color-button-default: #990099;
+    --color-button-default-hover: #660066;
     --color-playerX-dark: #990033;
     --color-playerX: #ff0066;
     --color-playerX-light: #ff99cc;

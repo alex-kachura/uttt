@@ -71,10 +71,6 @@ export default class UltimateTicTacToe extends Component {
   }
 
   execute(game, action) {
-    if (this.isTerminated(game)) {
-      this.openWinnerModal()
-    }
-
     if (this.assertActionLegality(game, action)) {
       const { gameIndex, smallGameOffset, smallGameIndex, largeGameIndex } = this.extractIndices(action)
       const mark = game[TURN_INDEX]
@@ -258,7 +254,7 @@ export default class UltimateTicTacToe extends Component {
       errors.push(`cell (rowIndex=${action.rowIndex}, colIndex=${action.colIndex}) is already taken`)
     }
 
-    errors.map(error => console.log('%c' + error, 'color:#A5003F'))
+    errors.map(error => console.log('%c' + error, 'color:#990033'))
 
     return !errors.length
   }
@@ -268,17 +264,29 @@ export default class UltimateTicTacToe extends Component {
   }
 
   handleCellClick(rowIndex, colIndex) {
-    const game = [...this.state.game]
+    let game = [...this.state.game]
     const action = new Action(rowIndex, colIndex, game[TURN_INDEX])
 
-    this.execute(game, action) && this.setState({ game }, this.computerTurn)
+    if (this.isTerminated(game)) this.openWinnerModal()
+
+    game = this.execute(game, action)
+
+    if (game) {
+      this.setState({ game }, this.computerTurn)
+      if (this.isTerminated(game)) this.openWinnerModal()
+    }
   }
 
   computerTurn() {
-    const game = [...this.state.game]
+    let game = [...this.state.game]
     const action = player.getAction()
 
-    this.execute(game, action) && this.setState({ game })
+    game = this.execute(game, action)
+
+    if (game) {
+      this.setState({ game })
+      if (this.isTerminated(game)) this.openWinnerModal()
+    }
   }
 
   toggleHints() {
@@ -310,14 +318,14 @@ export default class UltimateTicTacToe extends Component {
 
     return (
       <div className="uttt" key={utttKey}>
-        <button className="btn-primary" onClick={this.openChooseSideModal}>New Game</button>
+        <button className="btn btn-primary" onClick={this.openChooseSideModal}>New Game</button>
 
         <div
           className={classnames("game big-field field", {
-          playerXTurn: turn === X,
-          playerOTurn: turn === O,
-          finished: isTerminated
-      })}
+            playerXTurn: turn === X,
+            playerOTurn: turn === O,
+            finished: isTerminated
+          })}
         >
           {
             game.slice(81, 90).map((v, i) => {
@@ -325,16 +333,16 @@ export default class UltimateTicTacToe extends Component {
                 <div
                   key={i}
                   className={classnames("big-cell cell", {
-                  top: i < 3,
-                  middle: 3 <= i && i < 6,
-                  bottom: 6 <= i,
-                  left: !(i % 3),
-                  center: !((i - 1) % 3),
-                  right: !((i - 2) % 3),
-                  playerX: v === X,
-                  playerO: v === O,
-                  draw: v === DRAW
-                })}
+                    top: i < 3,
+                    middle: 3 <= i && i < 6,
+                    bottom: 6 <= i,
+                    left: !(i % 3),
+                    center: !((i - 1) % 3),
+                    right: !((i - 2) % 3),
+                    playerX: v === X,
+                    playerO: v === O,
+                    draw: v === DRAW
+                  })}
                 >
                   <div className="small-field field">
                     {
@@ -346,17 +354,17 @@ export default class UltimateTicTacToe extends Component {
                           <div
                             key={index}
                             className={classnames("small-cell cell", {
-                            top: j < 3,
-                            middle: 3 <= j && j < 6,
-                            bottom: 6 <= j,
-                            left: !(j % 3),
-                            center: !((j - 1) % 3),
-                            right: !((j - 2) % 3),
-                            possible: !isTerminated && indexOf(possibleIndices, index) > -1,
-                            playerX: v === EMPTY && w === X,
-                            playerO: v === EMPTY && w === O,
-                            lastPlayed: index === lastIndex
-                          })}
+                              top: j < 3,
+                              middle: 3 <= j && j < 6,
+                              bottom: 6 <= j,
+                              left: !(j % 3),
+                              center: !((j - 1) % 3),
+                              right: !((j - 2) % 3),
+                              possible: !isTerminated && indexOf(possibleIndices, index) > -1,
+                              playerX: v === EMPTY && w === X,
+                              playerO: v === EMPTY && w === O,
+                              lastPlayed: index === lastIndex
+                            })}
                             onClick={() => this.handleCellClick(rowIndex, colIndex)}
                           >
                             {mapCodeToIcon.get(w) || (isHintsShown && !isTerminated && player && player.getProbability(index)) || null}
@@ -382,8 +390,10 @@ export default class UltimateTicTacToe extends Component {
         </Modal>
 
         <Modal className="choose-side-modal" isShown={isChooseSideModalShown} onClose={this.closeChooseSideModal}>
-          <div className="play-as play-as-X" onClick={() => this.playAs(X)}>Play as {mapCodeToIcon.get(X)}</div>
-          <div className="play-as play-as-O" onClick={() => this.playAs(O)}>Play as {mapCodeToIcon.get(O)}</div>
+          <button className="btn play-as play-as-X" onClick={() => this.playAs(X)}>
+            Play as {mapCodeToIcon.get(X)}</button>
+          <button className="btn play-as play-as-O" onClick={() => this.playAs(O)}>
+            Play as {mapCodeToIcon.get(O)}</button>
         </Modal>
       </div>
     )

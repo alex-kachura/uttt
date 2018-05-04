@@ -113,9 +113,6 @@
 .play-as {
     display: flex;
     align-items: center;
-    padding: 0 1em;
-    height: 36px;
-    cursor: pointer;
 }
 
 .play-as.play-as-X:hover {
