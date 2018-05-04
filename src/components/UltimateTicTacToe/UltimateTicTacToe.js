@@ -379,7 +379,7 @@ export default class UltimateTicTacToe extends Component {
           }
         </div>
 
-        <Toggle checked={isHintsShown} onChange={this.toggleHints}>Show hints</Toggle>
+        <Toggle checked={isHintsShown} onChange={this.toggleHints}>Show AI hints</Toggle>
 
         <Modal className="winner-modal" isShown={isWinnerModalShown} onClose={this.closeWinnerModal}>
           {
