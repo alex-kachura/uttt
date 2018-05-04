@@ -139,5 +139,5 @@
 
 .game .fa-circle,
 .winner-modal > .fa-circle {
-    font-size: calc(var(--cell-size) / 1.3);
+    font-size: calc(var(--cell-size) / 1.4);
 }
