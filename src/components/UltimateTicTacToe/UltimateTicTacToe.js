@@ -42,7 +42,7 @@ export default class UltimateTicTacToe extends Component {
     this.closeWinnerModal = this.closeWinnerModal.bind(this)
   }
 
-  getInitialState(playAs = X, isHintsShown = true) {
+  getInitialState(playAs = X, isHintsShown = false) {
     const game = new Array(STATE_SIZE).fill(EMPTY)
 
     game[TURN_INDEX] = X
