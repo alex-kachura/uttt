@@ -18,7 +18,8 @@
 .btn-primary {
     font-size: 1em;
     border: none;
-    padding: 0.67em 1em;
+    padding: 0 1em;
+    height: 36px;
     line-height: 1em;
     text-transform: uppercase;
     cursor: pointer;
@@ -28,4 +29,8 @@
 
 .btn-primary:hover {
     background-color: var(--color-button-default-hover);
+}
+
+.modal__window {
+    padding: 3em;
 }

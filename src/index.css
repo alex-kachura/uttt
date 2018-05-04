@@ -3,15 +3,16 @@
     --big-cell-padding: 24px;
     --big-cell-border-width: 3px;
     --cell-size: calc((var(--field-size) - var(--big-cell-padding) * 6 - var(--big-cell-border-width) * 2) / 9);
-    --color-hover: #f5f5f5;
-    --color-active: #eaeaea;
+    --color-close: #afafaf;
+    --color-button-default: #00cc00;
+    --color-button-default-hover: #009900;
+    --color-playerX-dark: #990033;
     --color-playerX: #ff0066;
     --color-playerX-light: #ff99cc;
+    --color-playerO-dark: #3333cc;
     --color-playerO: #0099ff;
     --color-playerO-light: #99ccff;
-    --color-draw: #ffff99;
-    --color-button-default: #3399ff;
-    --color-button-default-hover: #2e8ae6;
+    --color-draw: #ffff66;
 }
 
 html, body, div, span, h1, h2, h3, h4, h5, h6, p, pre, a, big, code, em, img, small, strong, b, u, i, ul, li,

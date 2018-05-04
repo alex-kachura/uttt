@@ -1,13 +1,13 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import classnames from 'classnames'
 import isEmpty from 'lodash/isEmpty'
 import range from 'lodash/range'
 import indexOf from 'lodash/indexOf'
 import every from 'lodash/every'
 
+// import { XWon, OWon, draw } from '../../mocks'
 import { Action, X, O, DRAW, EMPTY } from './Action'
 import Player from './Player'
-// import { XWon, OWon, draw } from '../../mocks'
 import Toggle from '../Toggle/Toggle'
 import Modal from '../Modal/Modal'
 import './UltimateTicTacToe.css'
@@ -36,11 +36,13 @@ export default class UltimateTicTacToe extends Component {
 
     this.toggleHints = this.toggleHints.bind(this)
     this.startNewGame = this.startNewGame.bind(this)
-    this.openModal = this.openModal.bind(this)
-    this.closeModal = this.closeModal.bind(this)
+    this.openChooseSideModal = this.openChooseSideModal.bind(this)
+    this.closeChooseSideModal = this.closeChooseSideModal.bind(this)
+    this.openWinnerModal = this.openWinnerModal.bind(this)
+    this.closeWinnerModal = this.closeWinnerModal.bind(this)
   }
 
-  getInitialState(playAs = X, isShowHints = true) {
+  getInitialState(playAs = X, isHintsShown = true) {
     const game = new Array(STATE_SIZE).fill(EMPTY)
 
     game[TURN_INDEX] = X
@@ -48,8 +50,10 @@ export default class UltimateTicTacToe extends Component {
     return {
       game,
       playAs,
-      isShowHints,
-      isChooseSideModalShown: false
+      isHintsShown,
+      isChooseSideModalShown: false,
+      isWinnerModalShown: false,
+      lastIndex: -1
     }
   }
 
@@ -59,7 +63,7 @@ export default class UltimateTicTacToe extends Component {
 
   startNewGame() {
     utttKey++
-    this.setState(this.getInitialState(this.state.playAs, this.state.isShowHints), () => {
+    this.setState(this.getInitialState(this.state.playAs, this.state.isHintsShown), () => {
       if (this.state.playAs === O) {
         this.computerTurn()
       }
@@ -67,6 +71,10 @@ export default class UltimateTicTacToe extends Component {
   }
 
   execute(game, action) {
+    if (this.isTerminated(game)) {
+      this.openWinnerModal()
+    }
+
     if (this.assertActionLegality(game, action)) {
       const { gameIndex, smallGameOffset, smallGameIndex, largeGameIndex } = this.extractIndices(action)
       const mark = game[TURN_INDEX]
@@ -75,6 +83,12 @@ export default class UltimateTicTacToe extends Component {
       game[TURN_INDEX] = mark === O ? X : O
       this.setResult(game, mark, smallGameOffset, largeGameIndex)
       this.setConstraint(game, smallGameIndex)
+
+      if (gameIndex < 81) {
+        this.setState({
+          lastIndex: gameIndex
+        })
+      }
 
       return game
     } else {
@@ -268,19 +282,27 @@ export default class UltimateTicTacToe extends Component {
   }
 
   toggleHints() {
-    this.setState({ isShowHints: !this.state.isShowHints })
+    this.setState({ isHintsShown: !this.state.isHintsShown })
   }
 
-  openModal() {
+  openChooseSideModal() {
     this.setState({ isChooseSideModalShown: true })
   }
 
-  closeModal() {
+  closeChooseSideModal() {
     this.setState({ isChooseSideModalShown: false });
   }
 
+  openWinnerModal() {
+    this.setState({ isWinnerModalShown: true })
+  }
+
+  closeWinnerModal() {
+    this.setState({ isWinnerModalShown: false });
+  }
+
   render() {
-    const { game, isShowHints } = this.state
+    const { game, isHintsShown, isWinnerModalShown, isChooseSideModalShown, lastIndex } = this.state
     const turn = game[TURN_INDEX]
     const result = game[RESULT_INDEX]
     const isTerminated = this.isTerminated(game)
@@ -288,9 +310,7 @@ export default class UltimateTicTacToe extends Component {
 
     return (
       <div className="uttt" key={utttKey}>
-        <Toggle checked={isShowHints} onChange={this.toggleHints}>Show hints</Toggle>
-
-        <button className="btn-primary" onClick={this.openModal}>New Game</button>
+        <button className="btn-primary" onClick={this.openChooseSideModal}>New Game</button>
 
         <div
           className={classnames("game big-field field", {
@@ -334,11 +354,12 @@ export default class UltimateTicTacToe extends Component {
                             right: !((j - 2) % 3),
                             possible: !isTerminated && indexOf(possibleIndices, index) > -1,
                             playerX: v === EMPTY && w === X,
-                            playerO: v === EMPTY && w === O
+                            playerO: v === EMPTY && w === O,
+                            lastPlayed: index === lastIndex
                           })}
                             onClick={() => this.handleCellClick(rowIndex, colIndex)}
                           >
-                            {mapCodeToIcon.get(w) || (isShowHints && !isTerminated && player && player.getProbability(index)) || null}
+                            {mapCodeToIcon.get(w) || (isHintsShown && !isTerminated && player && player.getProbability(index)) || null}
                           </div>
                         )
                       })
@@ -350,21 +371,19 @@ export default class UltimateTicTacToe extends Component {
           }
         </div>
 
-        {
-          isTerminated ?
-            result === DRAW ?
-              <div className="result">Draw!</div> :
-              <div className="result">{mapCodeToIcon.get(result)} wins!</div> :
-            null
-        }
+        <Toggle checked={isHintsShown} onChange={this.toggleHints}>Show hints</Toggle>
 
-        <Modal
-          isShown={this.state.isChooseSideModalShown}
-          onClose={this.closeModal}
-          className="play-as-modal"
-        >
-          <div className="play-as" onClick={() => this.playAs(X)}>Play as {mapCodeToIcon.get(X)}</div>
-          <div className="play-as" onClick={() => this.playAs(O)}>Play as {mapCodeToIcon.get(O)}</div>
+        <Modal className="winner-modal" isShown={isWinnerModalShown} onClose={this.closeWinnerModal}>
+          {
+            result === DRAW ?
+              <Fragment>Draw!</Fragment> :
+              <Fragment>{mapCodeToIcon.get(result)} wins!</Fragment>
+          }
+        </Modal>
+
+        <Modal className="choose-side-modal" isShown={isChooseSideModalShown} onClose={this.closeChooseSideModal}>
+          <div className="play-as play-as-X" onClick={() => this.playAs(X)}>Play as {mapCodeToIcon.get(X)}</div>
+          <div className="play-as play-as-O" onClick={() => this.playAs(O)}>Play as {mapCodeToIcon.get(O)}</div>
         </Modal>
       </div>
     )
