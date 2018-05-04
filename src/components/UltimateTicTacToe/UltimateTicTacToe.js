@@ -349,6 +349,7 @@ export default class UltimateTicTacToe extends Component {
                       game.slice(i * 9, i * 9 + 9).map((w, j) => {
                         const index = i * 9 + j
                         const { rowIndex, colIndex } = this.convertToRC(index)
+                        const hint = isHintsShown && !isTerminated && player && player.getProbability(index)
 
                         return (
                           <div
@@ -367,7 +368,7 @@ export default class UltimateTicTacToe extends Component {
                             })}
                             onClick={() => this.handleCellClick(rowIndex, colIndex)}
                           >
-                            {mapCodeToIcon.get(w) || (isHintsShown && !isTerminated && player && player.getProbability(index)) || null}
+                            {mapCodeToIcon.get(w) || hint || null}
                           </div>
                         )
                       })
