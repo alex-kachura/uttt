@@ -21,6 +21,8 @@ export default class Player {
   getProbability(index) {
     this.updateState()
 
-    return indexOf(this.uttt.getPossibleIndices(this.state), index) > -1 ? `${index}%` : null
+    return indexOf(this.uttt.getPossibleIndices(this.state), index) > -1 ?
+      `${Math.floor(Math.random() * 99) + 1}%` :
+      null
   }
 }
