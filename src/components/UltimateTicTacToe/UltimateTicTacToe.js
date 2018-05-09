@@ -385,7 +385,7 @@ export default class UltimateTicTacToe extends Component {
         <Modal className="winner-modal" isShown={isWinnerModalShown} onClose={this.closeWinnerModal}>
           {
             result === DRAW ?
-              <Fragment>Draw!</Fragment> :
+              <Fragment>{mapCodeToIcon.get(DRAW)} draw!</Fragment> :
               <Fragment>{mapCodeToIcon.get(result)} wins!</Fragment>
           }
         </Modal>
