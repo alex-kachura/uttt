@@ -1,17 +1,18 @@
 :root {
-    --field-size: 498px;
+    --field-size: 500px;
     --big-cell-padding: 24px;
     --big-cell-border-width: 3px;
     --cell-size: calc((var(--field-size) - var(--big-cell-padding) * 6 - var(--big-cell-border-width) * 2) / 9);
     --color-close: #afafaf;
     --color-button-default: #990099;
     --color-button-default-hover: #660066;
+    --color-line: #3f3f3f;
     --color-playerX-dark: #990033;
     --color-playerX: #ff0066;
-    --color-playerX-light: #FBD6EB;
+    --color-playerX-light: #ff13654a;
     --color-playerO-dark: #3333cc;
     --color-playerO: #0099ff;
-    --color-playerO-light: #D6EBFB;
+    --color-playerO-light: #0099ff54;
     --color-draw: #ffff66;
 }
 
