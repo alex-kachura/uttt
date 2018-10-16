@@ -17,6 +17,9 @@ export default class Player {
 
   updateState() {
     this.state = [...this.uttt.state.game]
+
+    const input = this.uttt.getStateAsNdArray()
+    this.model.execute({ input })
   }
 
   getAction() {
@@ -29,9 +32,6 @@ export default class Player {
 
   getProbability(index) {
     this.updateState()
-
-    const input = this.uttt.getStateAsNdArray()
-    this.model.execute({ input })
 
     return indexOf(this.uttt.getLegalIndices(this.state), index) > -1 ?
       `${Math.floor(Math.random() * 99) + 1}%` :
