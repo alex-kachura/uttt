@@ -4,9 +4,9 @@ export const DRAW = '='.charCodeAt(0) // 61
 export const EMPTY = 0
 
 export class Action {
-  constructor(rowIndex = null, colIndex = null, turn = null/*, probability = null*/) {
-    this.rowIndex = rowIndex
-    this.colIndex = colIndex
+  constructor(r = null, c = null, turn = null/*, probability = null*/) {
+    this.r = r
+    this.c = c
     this.turn = turn
     // this.probability = probability
   }

@@ -4,9 +4,9 @@ import isEmpty from 'lodash/isEmpty'
 import range from 'lodash/range'
 import indexOf from 'lodash/indexOf'
 import every from 'lodash/every'
-
+import * as tf from '@tensorflow/tfjs'
 // import { XWon, OWon, draw } from '../../mocks'
-import { Action, X, O, DRAW, EMPTY } from './Action'
+import { Action, DRAW, EMPTY, O, X } from './Action'
 import Player from './Player'
 import Toggle from '../Toggle/Toggle'
 import Modal from '../Modal/Modal'
@@ -22,7 +22,7 @@ const STATE_SIZE = 93
 const mapCodeToIcon = new Map([
   [X, <i className="fal fa-times" />],
   [O, <i className="fal fa-circle" />],
-  [DRAW, <i className="fal fa-handshake" />]
+  [DRAW, <i className="fal fa-handshake" />],
 ])
 
 let utttKey = 0 // used to remount the React component
@@ -53,7 +53,7 @@ export default class UltimateTicTacToe extends Component {
       isHintsShown,
       isChooseSideModalShown: false,
       isWinnerModalShown: false,
-      lastIndex: -1
+      lastIndex: -1,
     }
   }
 
@@ -71,18 +71,18 @@ export default class UltimateTicTacToe extends Component {
   }
 
   execute(game, action) {
-    if (this.assertActionLegality(game, action)) {
-      const { gameIndex, smallGameOffset, smallGameIndex, largeGameIndex } = this.extractIndices(action)
+    if (this.verifyActionLegality(game, action)) {
+      const { gameIndex, smallGameOffset, smallGameIndex, largeGameIndex } = this.constructor.decodeAction(action)
       const mark = game[TURN_INDEX]
 
       game[gameIndex] = mark
       game[TURN_INDEX] = mark === O ? X : O
-      this.setResult(game, mark, smallGameOffset, largeGameIndex)
+      this.updateResult(game, mark, smallGameOffset, largeGameIndex)
       this.setConstraint(game, smallGameIndex)
 
       if (gameIndex < 81) {
         this.setState({
-          lastIndex: gameIndex
+          lastIndex: gameIndex,
         })
       }
 
@@ -116,44 +116,85 @@ export default class UltimateTicTacToe extends Component {
     return game[TURN_INDEX] === O
   }
 
-  getPossibleActions(game) {
-    return this.getPossibleIndices(game).map((index) => {
-      const { rowIndex, colIndex } = this.convertToRC(index)
+  getLegalActions(game) {
+    return this.getLegalIndices(game).map((index) => {
+      const { r, c } = this.constructor.convertToRC(index)
 
-      return new Action(rowIndex, colIndex, this.state.game[TURN_INDEX])
+      return new Action(r, c, this.state.game[TURN_INDEX])
     })
   }
 
-  convertToRC(index) {
-    const rowIndex = 3 * (Math.floor(index / 27)) + Math.floor((index % 9) / 3)
-    const colIndex = 3 * (Math.floor((index % 27) / 9)) + index % 3
+  getStateAsNdArray() {
+    // [0] current player's marks
+    // [1] opponent's marks
+    // [2] possible actions for current player
+    // [3] whose turn it is
+    const game = this.state.game
+    const shape = [1, 9, 9, 4]
+    const planes = tf.zeros(shape)
+    const buffer = tf.buffer(planes.shape, planes.dtype, planes.dataSync())
+    let indexForX = 0
+    let indexForO = 1
 
-    return { rowIndex, colIndex }
+    if (this.isTurnX(game)) {
+      indexForX = 0
+      indexForO = 1
+
+      range(0, 81).forEach((v, gi) => {
+        const { r, c } = this.constructor.convertToRC(gi)
+        buffer.set(1, 0, 3, r, c)
+      })
+    }
+
+    range(0, 81).forEach((v, gi) => {
+      const { r, c } = this.constructor.convertToRC(gi)
+
+      if (game[v] === X) {
+        buffer.set(1, 0, indexForX, r, c)
+      } else if (game[v] === O) {
+        buffer.set(1, 0, indexForO, r, c)
+      }
+    })
+
+    this.getLegalIndices(game).forEach((v, gi) => {
+      const { r, c } = this.constructor.convertToRC(gi)
+      buffer.set(1, 0, 2, r, c)
+    })
+
+    return buffer.toTensor()
   }
 
-  extractIndices(action) {
-    const smallGameOffset = 27 * (Math.floor(action.rowIndex / 3)) + 9 * (Math.floor(action.colIndex / 3))
-    const smallGameIndex = 3 * (action.rowIndex % 3) + action.colIndex % 3
+
+  static convertToRC(index) {
+    const r = 3 * (Math.floor(index / 27)) + Math.floor((index % 9) / 3)
+    const c = 3 * (Math.floor((index % 27) / 9)) + index % 3
+
+    return { r, c }
+  }
+
+  static decodeAction(action) {
+    const smallGameOffset = 27 * (Math.floor(action.r / 3)) + 9 * (Math.floor(action.c / 3))
+    const smallGameIndex = 3 * (action.r % 3) + action.c % 3
     const gameIndex = smallGameOffset + smallGameIndex
     const largeGameIndex = Math.floor(smallGameOffset / 9)
 
     return { gameIndex, smallGameOffset, smallGameIndex, largeGameIndex }
   }
 
-  getPossibleIndices(game) {
-    let indices = []
-
+  getLegalIndices(game) {
     if (game[CONSTRAINT_INDEX]) {
       const offset = 9 * (game[CONSTRAINT_INDEX] - 1)
 
-      indices = this.getEmptyIndices(game, offset)
-    } else {
-      range(81, 90).forEach((v, i) => {
-        if (game[v] === EMPTY) {
-          indices = indices.concat(this.getEmptyIndices(game, 9 * i))
-        }
-      })
+      return this.getEmptyIndices(game, offset)
     }
+
+    let indices = []
+
+    range(81, 90).forEach((v, i) => {
+      if (game[v] === EMPTY) {
+        indices = indices.concat(this.getEmptyIndices(game, 9 * i))
+      }
+    })
 
     return indices
   }
@@ -193,11 +234,11 @@ export default class UltimateTicTacToe extends Component {
     return every(range(offset, offset + 9), i => game[i] !== EMPTY)
   }
 
-  setConstraint(game, index) {
-    if (game[81 + index]) { // if finished
+  setConstraint(game, largeGameIndex) {
+    if (game[81 + largeGameIndex]) { // if finished
       game[CONSTRAINT_INDEX] = 0 // 0 denotes no constraint
     } else {
-      game[CONSTRAINT_INDEX] = index + 1 // [1..9] means there is constraint
+      game[CONSTRAINT_INDEX] = largeGameIndex + 1 // [1..9] means there is constraint
     }
 
     const offset = (game[CONSTRAINT_INDEX] - 1) * 9
@@ -208,27 +249,32 @@ export default class UltimateTicTacToe extends Component {
   }
 
   /* result is assigned to a game when either of players won or all positions are taken */
-  setResult(game, mark, smallGameOffset, largeGameIndex) {
+  updateResult(game, mark, smallGameOffset, largeGameIndex) {
+    let updated = false
     // check small game
     if (this.hasWinningPosition(game, mark, smallGameOffset)) {
       game[81 + largeGameIndex] = mark
+      updated = true
     } else if (this.isFull(game, smallGameOffset)) {
       game[81 + largeGameIndex] = DRAW
+      updated = true
     }
     // check large game
-    if (this.hasWinningPosition(game, mark, 81)) {
-      game[RESULT_INDEX] = mark
-    } else if (this.isFull(game, 81)) {
-      game[RESULT_INDEX] = DRAW
+    if (updated) {
+      if (this.hasWinningPosition(game, mark, 81)) {
+        game[RESULT_INDEX] = mark
+      } else if (this.isFull(game, 81)) {
+        game[RESULT_INDEX] = DRAW
+      }
     }
   }
 
-  assertActionLegality(game, action) {
+  verifyActionLegality(game, action) {
     if (isEmpty(action)) {
       return false
     }
 
-    const { gameIndex, largeGameIndex } = this.extractIndices(action)
+    const { gameIndex, largeGameIndex } = this.constructor.decodeAction(action)
     const errors = []
 
     if (this.isTerminated(game)) {
@@ -237,11 +283,11 @@ export default class UltimateTicTacToe extends Component {
     if (game[TURN_INDEX] !== action.turn) {
       errors.push(`environment expects action with turn=${game[TURN_INDEX]}, but selected action has turn=${action.turn}`)
     }
-    if (!(0 <= action.rowIndex && action.rowIndex < 9)) {
-      errors.push(`rowIndex value = ${action.rowIndex} is out of the scope of the board`)
+    if (!(0 <= action.r && action.r < 9)) {
+      errors.push(`r value = ${action.r} is out of the scope of the board`)
     }
-    if (!(0 <= action.colIndex && action.colIndex < 9)) {
-      errors.push(`colIndex value = ${action.colIndex} is out of the scope of the board`)
+    if (!(0 <= action.c && action.c < 9)) {
+      errors.push(`c value = ${action.c} is out of the scope of the board`)
     }
     if (game[CONSTRAINT_INDEX] !== 0 && largeGameIndex !== game[CONSTRAINT_INDEX] - 1) {
       errors.push(`next move is under constraint=${game[CONSTRAINT_INDEX] -
@@ -251,7 +297,7 @@ export default class UltimateTicTacToe extends Component {
       errors.push(`selected sub-game=${largeGameIndex} is finished`)
     }
     if (game[gameIndex]) {
-      errors.push(`cell (rowIndex=${action.rowIndex}, colIndex=${action.colIndex}) is already taken`)
+      errors.push(`cell (r=${action.r}, c=${action.c}) is already taken`)
     }
 
     errors.map(error => console.log('%c' + error, 'color:#990033'))
@@ -263,9 +309,9 @@ export default class UltimateTicTacToe extends Component {
     this.setState({ playAs }, this.startNewGame)
   }
 
-  handleCellClick(rowIndex, colIndex) {
+  handleCellClick(r, c) {
     let game = [...this.state.game]
-    const action = new Action(rowIndex, colIndex, game[TURN_INDEX])
+    const action = new Action(r, c, game[TURN_INDEX])
 
     if (this.isTerminated(game)) this.openWinnerModal()
 
@@ -298,7 +344,7 @@ export default class UltimateTicTacToe extends Component {
   }
 
   closeChooseSideModal() {
-    this.setState({ isChooseSideModalShown: false });
+    this.setState({ isChooseSideModalShown: false })
   }
 
   openWinnerModal() {
@@ -306,7 +352,7 @@ export default class UltimateTicTacToe extends Component {
   }
 
   closeWinnerModal() {
-    this.setState({ isWinnerModalShown: false });
+    this.setState({ isWinnerModalShown: false })
   }
 
   render() {
@@ -314,17 +360,17 @@ export default class UltimateTicTacToe extends Component {
     const turn = game[TURN_INDEX]
     const result = game[RESULT_INDEX]
     const isTerminated = this.isTerminated(game)
-    const possibleIndices = this.getPossibleIndices(game)
+    const possibleIndices = this.getLegalIndices(game)
 
     return (
       <div className="uttt" key={utttKey}>
         <button className="btn btn-primary" onClick={this.openChooseSideModal}>New Game</button>
 
         <div
-          className={classnames("game big-field field", {
+          className={classnames('game big-field field', {
             playerXTurn: turn === X,
             playerOTurn: turn === O,
-            finished: isTerminated
+            finished: isTerminated,
           })}
         >
           {
@@ -332,7 +378,7 @@ export default class UltimateTicTacToe extends Component {
               return (
                 <div
                   key={i}
-                  className={classnames("big-cell cell", {
+                  className={classnames('big-cell cell', {
                     top: i < 3,
                     middle: 3 <= i && i < 6,
                     bottom: 6 <= i,
@@ -341,20 +387,20 @@ export default class UltimateTicTacToe extends Component {
                     right: !((i - 2) % 3),
                     playerX: v === X,
                     playerO: v === O,
-                    draw: v === DRAW
+                    draw: v === DRAW,
                   })}
                 >
                   <div className="small-field field">
                     {
                       game.slice(i * 9, i * 9 + 9).map((w, j) => {
                         const index = i * 9 + j
-                        const { rowIndex, colIndex } = this.convertToRC(index)
+                        const { r, c } = this.constructor.convertToRC(index)
                         const hint = isHintsShown && !isTerminated && player && player.getProbability(index)
 
                         return (
                           <div
                             key={index}
-                            className={classnames("small-cell cell", {
+                            className={classnames('small-cell cell', {
                               top: j < 3,
                               middle: 3 <= j && j < 6,
                               bottom: 6 <= j,
@@ -364,9 +410,9 @@ export default class UltimateTicTacToe extends Component {
                               possible: !isTerminated && indexOf(possibleIndices, index) > -1,
                               playerX: v === EMPTY && w === X,
                               playerO: v === EMPTY && w === O,
-                              lastPlayed: index === lastIndex
+                              lastPlayed: index === lastIndex,
                             })}
-                            onClick={() => this.handleCellClick(rowIndex, colIndex)}
+                            onClick={() => this.handleCellClick(r, c)}
                           >
                             {mapCodeToIcon.get(w) || hint || null}
                           </div>
