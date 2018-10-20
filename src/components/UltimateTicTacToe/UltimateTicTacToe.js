@@ -6,13 +6,15 @@ import indexOf from 'lodash/indexOf'
 import every from 'lodash/every'
 import cloneDeep from 'lodash/cloneDeep'
 import * as tf from '@tensorflow/tfjs'
+import { FontAwesomeIcon as Icon } from '@fortawesome/react-fontawesome'
+
+import './UltimateTicTacToe.css'
 // import { XWon, OWon, draw } from 'environment/mocks'
 import Action from 'environment/Action'
 import { DRAW, O, X } from 'environment/marks'
 import RandomPlayer from 'players/RandomPlayer'
 import Toggle from 'components/Toggle/Toggle'
 import Modal from 'components/Modal/Modal'
-import './UltimateTicTacToe.css'
 
 // state encoding:
 // [0..80] - small games
@@ -22,9 +24,9 @@ const CONSTRAINT_INDEX = 91
 const RESULT_INDEX = 92
 const STATE_SIZE = 93
 const mapCodeToIcon = new Map([
-  [X, <i className="fal fa-times" />],
-  [O, <i className="fal fa-circle" />],
-  [DRAW, <i className="fal fa-handshake" />],
+  [X, <Icon icon={['fal', 'times']} />],
+  [O, <Icon icon={['fal', 'circle']} />],
+  [DRAW, <Icon icon={['fal', 'handshake']} />],
 ])
 
 let utttKey = 0 // used to remount the React component
@@ -435,7 +437,7 @@ export default class UltimateTicTacToe extends Component {
           }
         </div>
 
-        <Toggle checked={isHintsShown} onChange={this.toggleHints}>Show AI hints</Toggle>
+        <Toggle filled checked={isHintsShown} onChange={this.toggleHints}>Show AI hints</Toggle>
 
         <Modal className="winner-modal" isShown={isWinnerModalShown} onClose={this.closeWinnerModal}>
           {
