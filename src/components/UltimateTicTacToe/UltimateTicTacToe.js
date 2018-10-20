@@ -4,12 +4,14 @@ import isEmpty from 'lodash/isEmpty'
 import range from 'lodash/range'
 import indexOf from 'lodash/indexOf'
 import every from 'lodash/every'
+import cloneDeep from 'lodash/cloneDeep'
 import * as tf from '@tensorflow/tfjs'
-// import { XWon, OWon, draw } from '../../mocks'
-import { Action, DRAW, EMPTY, O, X } from './Action'
-import Player from './Player'
-import Toggle from '../Toggle/Toggle'
-import Modal from '../Modal/Modal'
+// import { XWon, OWon, draw } from 'environment/mocks'
+import Action from 'environment/Action'
+import { DRAW, O, X } from 'environment/marks'
+import RandomPlayer from 'players/RandomPlayer'
+import Toggle from 'components/Toggle/Toggle'
+import Modal from 'components/Modal/Modal'
 import './UltimateTicTacToe.css'
 
 // state encoding:
@@ -29,10 +31,10 @@ let utttKey = 0 // used to remount the React component
 let player
 
 export default class UltimateTicTacToe extends Component {
-  constructor(...args) {
-    super(...args)
+  constructor(state) {
+    super()
 
-    this.state = this.getInitialState()
+    this.state = isEmpty(state) ? this.getInitialState() : state
 
     this.toggleHints = this.toggleHints.bind(this)
     this.startNewGame = this.startNewGame.bind(this)
@@ -42,8 +44,12 @@ export default class UltimateTicTacToe extends Component {
     this.closeWinnerModal = this.closeWinnerModal.bind(this)
   }
 
+  clone() {
+    return new UltimateTicTacToe(cloneDeep(this.state))
+  }
+
   getInitialState(playAs = X, isHintsShown = false) {
-    const game = new Array(STATE_SIZE).fill(EMPTY)
+    const game = new Array(STATE_SIZE).fill(0)
 
     game[TURN_INDEX] = X
 
@@ -58,7 +64,7 @@ export default class UltimateTicTacToe extends Component {
   }
 
   componentDidMount() {
-    player = new Player(this)
+    player = new RandomPlayer()
   }
 
   startNewGame() {
@@ -191,7 +197,7 @@ export default class UltimateTicTacToe extends Component {
     let indices = []
 
     range(81, 90).forEach((v, i) => {
-      if (game[v] === EMPTY) {
+      if (game[v] === 0) {
         indices = indices.concat(this.getEmptyIndices(game, 9 * i))
       }
     })
@@ -200,7 +206,7 @@ export default class UltimateTicTacToe extends Component {
   }
 
   getEmptyIndices(game, offset) {
-    return range(offset, offset + 9).filter(i => game[i] === EMPTY)
+    return range(offset, offset + 9).filter(i => game[i] === 0)
   }
 
   hasWinningPosition(game, mark, offset) {
@@ -231,7 +237,7 @@ export default class UltimateTicTacToe extends Component {
 
   /* game is considered as full when all positions are taken */
   isFull(game, offset) {
-    return every(range(offset, offset + 9), i => game[i] !== EMPTY)
+    return every(range(offset, offset + 9), i => game[i] !== 0)
   }
 
   setConstraint(game, largeGameIndex) {
@@ -325,7 +331,7 @@ export default class UltimateTicTacToe extends Component {
 
   computerTurn() {
     let game = [...this.state.game]
-    const action = player.getAction()
+    const action = player.getAction(this)
 
     game = this.execute(game, action)
 
@@ -361,6 +367,9 @@ export default class UltimateTicTacToe extends Component {
     const result = game[RESULT_INDEX]
     const isTerminated = this.isTerminated(game)
     const possibleIndices = this.getLegalIndices(game)
+    const probabilities = player
+      ? player.getProbabilities(this)
+      : []
 
     return (
       <div className="uttt" key={utttKey}>
@@ -395,7 +404,7 @@ export default class UltimateTicTacToe extends Component {
                       game.slice(i * 9, i * 9 + 9).map((w, j) => {
                         const index = i * 9 + j
                         const { r, c } = this.constructor.convertToRC(index)
-                        const hint = isHintsShown && !isTerminated && player && player.getProbability(index)
+                        const hint = isHintsShown && !isTerminated && probabilities[index]
 
                         return (
                           <div
@@ -408,8 +417,8 @@ export default class UltimateTicTacToe extends Component {
                               center: !((j - 1) % 3),
                               right: !((j - 2) % 3),
                               possible: !isTerminated && indexOf(possibleIndices, index) > -1,
-                              playerX: v === EMPTY && w === X,
-                              playerO: v === EMPTY && w === O,
+                              playerX: v === 0 && w === X,
+                              playerO: v === 0 && w === O,
                               lastPlayed: index === lastIndex,
                             })}
                             onClick={() => this.handleCellClick(r, c)}
